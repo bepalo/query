@@ -119,66 +119,37 @@ export declare const TSelectorPatch: Type<any, any>;
 export type SelectorPatch = typeof TSelectorPatch.infer;
 export declare const TSelectorDelete: Type<any, any>;
 export type SelectorDelete = typeof TSelectorDelete.infer;
-declare const TOptionsQuery: import("arktype/internal/variants/object.ts", { with: { "resolution-mode": "import" } }).ObjectType<{
-    guest?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    mine?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    "mine|guest"?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-}, {}>;
+declare const TOptionsQuery: Type<any, any>;
 export type OptionsQuery = typeof TOptionsQuery.infer;
 type CTXOptionsQuery = {
     query: OptionsQuery;
 };
-declare const TGetQuery: import("arktype/internal/variants/object.ts", { with: { "resolution-mode": "import" } }).ObjectType<{
-    findFirst?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    guest?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    mine?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    "mine|guest"?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    includeTotal?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    select?: any;
-}, {}>;
+declare const TGetQuery: Type<any, any>;
 export type GetQuery = typeof TGetQuery.infer;
 type CTXGetQuery = {
     query: GetQuery;
 };
-declare const TPostQuery: import("arktype/internal/variants/object.ts", { with: { "resolution-mode": "import" } }).ObjectType<{
-    guest?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    mine?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    "mine|guest"?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    includeTotal?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    select?: any;
-}, {}>;
+declare const TPostQuery: Type<any, any>;
 export type PostQuery = typeof TPostQuery.infer;
 type CTXPostQuery = {
     query: PostQuery;
 };
-export declare const TPostBody: import("arktype/internal/variants/object.ts", { with: { "resolution-mode": "import" } }).ObjectType<Record<string, unknown> | Record<string, unknown>[], {}>;
+export declare const TPostBody: Type<any, any>;
 export type PostBody = typeof TPostBody.infer;
 export type CTXPostBody = {
     body: PostBody;
 };
-declare const TPatchQuery: import("arktype/internal/variants/object.ts", { with: { "resolution-mode": "import" } }).ObjectType<{
-    guest?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    mine?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    "mine|guest"?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    includeTotal?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    select?: any;
-}, {}>;
+declare const TPatchQuery: Type<any, any>;
 export type PatchQuery = typeof TPatchQuery.infer;
 type CTXPatchQuery = {
     query: PatchQuery;
 };
-export declare const TPatchBody: import("arktype/internal/variants/object.ts", { with: { "resolution-mode": "import" } }).ObjectType<Record<string, unknown>, {}>;
+export declare const TPatchBody: Type<any, any>;
 export type PatchBody = typeof TPatchBody.infer;
 export type CTXPatchBody = {
     body: PatchBody;
 };
-declare const TDeleteQuery: import("arktype/internal/variants/object.ts", { with: { "resolution-mode": "import" } }).ObjectType<{
-    guest?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    mine?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    "mine|guest"?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    includeTotal?: ((In: "" | "T" | "F") => import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<false> | import("arktype/internal/attributes.ts", { with: { "resolution-mode": "import" } }).To<true>) | undefined;
-    select?: any;
-}, {}>;
+declare const TDeleteQuery: Type<any, any>;
 export type DeleteQuery = typeof TDeleteQuery.infer;
 type CTXDeleteQuery = {
     query: DeleteQuery;

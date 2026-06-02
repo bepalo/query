@@ -119,66 +119,37 @@ export declare const TSelectorPatch: Type<any, any>;
 export type SelectorPatch = typeof TSelectorPatch.infer;
 export declare const TSelectorDelete: Type<any, any>;
 export type SelectorDelete = typeof TSelectorDelete.infer;
-declare const TOptionsQuery: import("arktype/out/variants/object").ObjectType<{
-    guest?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    mine?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    "mine|guest"?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-}, {}>;
+declare const TOptionsQuery: Type<any, any>;
 export type OptionsQuery = typeof TOptionsQuery.infer;
 type CTXOptionsQuery = {
     query: OptionsQuery;
 };
-declare const TGetQuery: import("arktype/out/variants/object").ObjectType<{
-    findFirst?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    guest?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    mine?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    "mine|guest"?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    includeTotal?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    select?: any;
-}, {}>;
+declare const TGetQuery: Type<any, any>;
 export type GetQuery = typeof TGetQuery.infer;
 type CTXGetQuery = {
     query: GetQuery;
 };
-declare const TPostQuery: import("arktype/out/variants/object").ObjectType<{
-    guest?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    mine?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    "mine|guest"?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    includeTotal?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    select?: any;
-}, {}>;
+declare const TPostQuery: Type<any, any>;
 export type PostQuery = typeof TPostQuery.infer;
 type CTXPostQuery = {
     query: PostQuery;
 };
-export declare const TPostBody: import("arktype/out/variants/object").ObjectType<Record<string, unknown> | Record<string, unknown>[], {}>;
+export declare const TPostBody: Type<any, any>;
 export type PostBody = typeof TPostBody.infer;
 export type CTXPostBody = {
     body: PostBody;
 };
-declare const TPatchQuery: import("arktype/out/variants/object").ObjectType<{
-    guest?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    mine?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    "mine|guest"?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    includeTotal?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    select?: any;
-}, {}>;
+declare const TPatchQuery: Type<any, any>;
 export type PatchQuery = typeof TPatchQuery.infer;
 type CTXPatchQuery = {
     query: PatchQuery;
 };
-export declare const TPatchBody: import("arktype/out/variants/object").ObjectType<Record<string, unknown>, {}>;
+export declare const TPatchBody: Type<any, any>;
 export type PatchBody = typeof TPatchBody.infer;
 export type CTXPatchBody = {
     body: PatchBody;
 };
-declare const TDeleteQuery: import("arktype/out/variants/object").ObjectType<{
-    guest?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    mine?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    "mine|guest"?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    includeTotal?: ((In: "" | "T" | "F") => import("arktype/out/attributes").To<false> | import("arktype/out/attributes").To<true>) | undefined;
-    select?: any;
-}, {}>;
+declare const TDeleteQuery: Type<any, any>;
 export type DeleteQuery = typeof TDeleteQuery.infer;
 type CTXDeleteQuery = {
     query: DeleteQuery;

@@ -303,7 +303,7 @@ export const TSelectorDelete: Type<any, any> = RJSOnScope.type(
 
 export type SelectorDelete = typeof TSelectorDelete.infer;
 
-const TOptionsQuery = type(
+const TOptionsQuery: Type<any, any> = type(
   type({
     "guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
@@ -323,7 +323,7 @@ type CTXOptionsQuery = {
   query: OptionsQuery;
 };
 
-const TGetQuery = type(
+const TGetQuery: Type<any, any> = type(
   type({
     "findFirst?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
@@ -352,7 +352,7 @@ type CTXGetQuery = {
   query: GetQuery;
 };
 
-const TPostQuery = type(
+const TPostQuery: Type<any, any> = type(
   type({
     "guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
@@ -378,7 +378,7 @@ type CTXPostQuery = {
   query: PostQuery;
 };
 
-export const TPostBody = type(
+export const TPostBody: Type<any, any> = type(
   "Record<string, unknown>|Record<string, unknown>[]",
 );
 
@@ -388,7 +388,7 @@ export type CTXPostBody = {
   body: PostBody;
 };
 
-const TPatchQuery = type(
+const TPatchQuery: Type<any, any> = type(
   type({
     "guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
@@ -414,7 +414,7 @@ type CTXPatchQuery = {
   query: PatchQuery;
 };
 
-export const TPatchBody = type("Record<string, unknown>");
+export const TPatchBody: Type<any, any> = type("Record<string, unknown>");
 
 export type PatchBody = typeof TPatchBody.infer;
 
@@ -422,7 +422,7 @@ export type CTXPatchBody = {
   body: PatchBody;
 };
 
-const TDeleteQuery = type(
+const TDeleteQuery: Type<any, any> = type(
   type({
     "guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)

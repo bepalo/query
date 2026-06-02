@@ -37,7 +37,7 @@ export class BepaloQuery<
     options: Omit<GetQuery, "select"> & {
       select?: BepaloQueryWith<SelectorGet, Database, Schema, N>;
     },
-  ) {
+  ): URLSearchParams {
     const params = new URLSearchParams();
     for (const [k, v] of Object.entries(options)) {
       params.set(k, RJSON.stringify(v));
@@ -49,7 +49,7 @@ export class BepaloQuery<
     options: Omit<PostQuery, "select"> & {
       select?: BepaloQueryWith<SelectorPost, Database, Schema, N>;
     },
-  ) {
+  ): URLSearchParams {
     const params = new URLSearchParams();
     for (const [k, v] of Object.entries(options)) {
       params.set(k, RJSON.stringify(v));
@@ -61,7 +61,7 @@ export class BepaloQuery<
     options: Omit<PatchQuery, "select"> & {
       select?: BepaloQueryWith<SelectorPatch, Database, Schema, N>;
     },
-  ) {
+  ): URLSearchParams {
     const params = new URLSearchParams();
     for (const [k, v] of Object.entries(options)) {
       params.set(k, RJSON.stringify(v));
@@ -73,7 +73,7 @@ export class BepaloQuery<
     options: Omit<DeleteQuery, "select"> & {
       select?: BepaloQueryWith<SelectorDelete, Database, Schema, N>;
     },
-  ) {
+  ): URLSearchParams {
     const params = new URLSearchParams();
     for (const [k, v] of Object.entries(options)) {
       params.set(k, RJSON.stringify(v));
