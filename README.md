@@ -138,7 +138,7 @@ pnpm add @bepalo/query
 // src/db/index.ts
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
-import { type ACL as IACL } from "../../../src";
+import { type ACL as IACL } from "@bepalo/query";
 import type { CTXUserSession } from "@/auth/middleware";
 import * as schema from "./schema";
 export * as schema from "./schema";

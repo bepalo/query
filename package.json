@@ -1,6 +1,6 @@
 {
   "name": "@bepalo/query",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A type-safe access-control-driven unified RESTful database query engine for backend using Drizzle ORM.",
   "author": "Natnael Eshetu",
   "license": "MIT",
