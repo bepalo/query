@@ -103,13 +103,10 @@ export type ACL<Role extends string, CTXSession extends object, XContext, Schema
 }, Transaction extends InferTransaction<Database> = InferTransaction<Database>, Query extends InferQuery<Database> = InferQuery<Database>> = {
     [K in keyof PickTables<Schema> as PickTables<Schema>[K] extends Table ? string : never]?: ACLEntry<Role, CTXSession & XContext & CTXACLCommon<Role> & CTXACLResult<Schema, K>, PickTables<Schema>, Database, Transaction, Query, K>;
 };
-export type SimpleRequestHandler<Context> = {
-    (req: Request & {
+export type Routes = {
+    [M in HttpMethod]?: (req: Request & {
         params: Record<string, string>;
-    }, ctx?: Context): Promise<Response>;
-};
-export type Routes<Context, SpecificContext extends Partial<Record<HttpMethod, Record<string, any>>> = Record<HttpMethod, never>> = {
-    [M in HttpMethod]?: SimpleRequestHandler<Context & SpecificContext[M]>;
+    }) => Promise<Response>;
 };
 export declare const TSelectorGet: Type<any, any>;
 export type SelectorGet = typeof TSelectorGet.infer;
@@ -121,19 +118,10 @@ export declare const TSelectorDelete: Type<any, any>;
 export type SelectorDelete = typeof TSelectorDelete.infer;
 declare const TOptionsQuery: Type<any, any>;
 export type OptionsQuery = typeof TOptionsQuery.infer;
-type CTXOptionsQuery = {
-    query: OptionsQuery;
-};
 declare const TGetQuery: Type<any, any>;
 export type GetQuery = typeof TGetQuery.infer;
-type CTXGetQuery = {
-    query: GetQuery;
-};
 declare const TPostQuery: Type<any, any>;
 export type PostQuery = typeof TPostQuery.infer;
-type CTXPostQuery = {
-    query: PostQuery;
-};
 export declare const TPostBody: Type<any, any>;
 export type PostBody = typeof TPostBody.infer;
 export type CTXPostBody = {
@@ -141,9 +129,6 @@ export type CTXPostBody = {
 };
 declare const TPatchQuery: Type<any, any>;
 export type PatchQuery = typeof TPatchQuery.infer;
-type CTXPatchQuery = {
-    query: PatchQuery;
-};
 export declare const TPatchBody: Type<any, any>;
 export type PatchBody = typeof TPatchBody.infer;
 export type CTXPatchBody = {
@@ -151,9 +136,6 @@ export type CTXPatchBody = {
 };
 declare const TDeleteQuery: Type<any, any>;
 export type DeleteQuery = typeof TDeleteQuery.infer;
-type CTXDeleteQuery = {
-    query: DeleteQuery;
-};
 export declare enum SurpassMaxLimit {
     Limit = 0,
     Throw = 1
@@ -181,20 +163,6 @@ export declare const createQueryRoute: <Role extends string, CTXSession extends 
     onError?: {
         (error: HttpError | Error): void;
     };
-}) => Routes<CTXSession & XContext & CTXACLCommon<Role> & {
-    url: URL;
-    resourceId: string;
-}, {
-    OPTIONS: CTXOptionsQuery;
-    HEAD: CTXGetQuery & CTXACLResult<Schema, keyof Schema> & {
-        findFirst?: boolean;
-    };
-    GET: CTXGetQuery & CTXACLResult<Schema, keyof Schema> & {
-        findFirst?: boolean;
-    };
-    POST: CTXPostQuery & CTXPostBody & CTXACLResult<Schema, keyof Schema>;
-    PATCH: CTXPatchQuery & CTXPatchBody & CTXACLResult<Schema, keyof Schema>;
-    DELETE: CTXDeleteQuery & CTXACLResult<Schema, keyof Schema>;
-}>;
+}) => Routes;
 export {};
 //# sourceMappingURL=query.d.ts.map

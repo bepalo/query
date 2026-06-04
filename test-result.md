@@ -2,7 +2,7 @@
 
 | 🕙 Start time | ⌛ Duration |
 | --- | ---: |
-| 6/2/2026, 11:34:20 PM | 1.928 s |
+| 6/4/2026, 3:24:42 PM | 1.882 s |
 
 | | ✅ Passed | ❌ Failed | ⏩ Skipped | 🚧 Todo | ⚪ Total |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -11,7 +11,7 @@
 
 ## ✅ <a id="file0" href="#file0">tests/client.test.ts</a>
 
-24 passed, 0 failed, 0 skipped, 0 todo, done in 15.733062999999902 s
+24 passed, 0 failed, 0 skipped, 0 todo, done in 16.326407000000017 s
 
 ```
 ✅ Client Query Builder › GET Queries
@@ -51,7 +51,7 @@
 
 ## ✅ <a id="file1" href="#file1">tests/create-query-route.test.ts</a>
 
-3 passed, 0 failed, 0 skipped, 0 todo, done in 7.237803999999869 s
+3 passed, 0 failed, 0 skipped, 0 todo, done in 6.253281999999672 s
 
 ```
 ✅ createQueryRoute
@@ -62,7 +62,7 @@
 
 ## ✅ <a id="file2" href="#file2">tests/http-error.test.ts</a>
 
-6 passed, 0 failed, 0 skipped, 0 todo, done in 9.632162000000335 s
+6 passed, 0 failed, 0 skipped, 0 todo, done in 9.965693999999985 s
 
 ```
 ✅ HttpError
@@ -76,7 +76,7 @@
 
 ## ✅ <a id="file3" href="#file3">tests/integration.test.ts</a>
 
-6 passed, 0 failed, 0 skipped, 0 todo, done in 25.68094199999996 s
+6 passed, 0 failed, 0 skipped, 0 todo, done in 25.94682499999999 s
 
 ```
 ✅ Integration — createQueryRoute full lifecycle
@@ -90,7 +90,7 @@
 
 ## ✅ <a id="file4" href="#file4">tests/query-validation.test.ts</a>
 
-41 passed, 0 failed, 0 skipped, 0 todo, done in 23.802161999999953 s
+41 passed, 0 failed, 0 skipped, 0 todo, done in 22.388962999999876 s
 
 ```
 ✅ TSelectorGet — GET query selector validation
@@ -145,7 +145,7 @@
 
 ## ✅ <a id="file5" href="#file5">tests/rjson.test.ts</a>
 
-36 passed, 0 failed, 0 skipped, 0 todo, done in 18.08872599999995 s
+36 passed, 0 failed, 0 skipped, 0 todo, done in 21.05959699999994 s
 
 ```
 ✅ RJSON - Serialization › Basic Types

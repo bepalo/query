@@ -252,19 +252,10 @@ export type ACL<
   >;
 };
 
-export type SimpleRequestHandler<Context> = {
-  (
+export type Routes = {
+  [M in HttpMethod]?: (
     req: Request & { params: Record<string, string> },
-    ctx?: Context,
-  ): Promise<Response>;
-};
-
-export type Routes<
-  Context,
-  SpecificContext extends Partial<Record<HttpMethod, Record<string, any>>> =
-    Record<HttpMethod, never>,
-> = {
-  [M in HttpMethod]?: SimpleRequestHandler<Context & SpecificContext[M]>;
+  ) => Promise<Response>;
 };
 
 const RJSOnScope = type.scope({
@@ -495,23 +486,29 @@ export const createQueryRoute = <
     maxLimit?: number;
   };
   onError?: { (error: HttpError | Error): void };
-}): Routes<
-  CTXSession & XContext & CTXACLCommon<Role> & { url: URL; resourceId: string },
-  {
-    OPTIONS: CTXOptionsQuery;
-    HEAD: CTXGetQuery &
-      CTXACLResult<Schema, keyof Schema> & {
-        findFirst?: boolean;
-      };
-    GET: CTXGetQuery &
-      CTXACLResult<Schema, keyof Schema> & {
-        findFirst?: boolean;
-      };
-    POST: CTXPostQuery & CTXPostBody & CTXACLResult<Schema, keyof Schema>;
-    PATCH: CTXPatchQuery & CTXPatchBody & CTXACLResult<Schema, keyof Schema>;
-    DELETE: CTXDeleteQuery & CTXACLResult<Schema, keyof Schema>;
-  }
-> => {
+}): Routes => {
+  /////////////////////////////////////////////////////////
+  type CTXCommon = CTXSession &
+    XContext &
+    CTXACLCommon<Role> & { url: URL; resourceId: string };
+  type CTXOptions = CTXCommon & CTXOptionsQuery;
+  type CTXGet = CTXCommon &
+    CTXGetQuery &
+    CTXACLResult<Schema, keyof Schema> & {
+      findFirst?: boolean;
+    };
+  type CTXPost = CTXCommon &
+    CTXPostQuery &
+    CTXPostBody &
+    CTXACLResult<Schema, keyof Schema>;
+  type CTXPatch = CTXCommon &
+    CTXPatchQuery &
+    CTXPatchBody &
+    CTXACLResult<Schema, keyof Schema>;
+  type CTXDelete = CTXCommon &
+    CTXDeleteQuery &
+    CTXACLResult<Schema, keyof Schema>;
+  /////////////////////////////////////////////////////////
   const parseSession = session?.parser;
   const getRoleFromSession = session?.getRole;
   const defaultResultFormatter: RequestHandler<
@@ -840,29 +837,12 @@ export const createQueryRoute = <
       ctx.userRole = getRoleFromSession && getRoleFromSession(req, ctx);
     }
   };
-  const routes: Routes<
-    CTXSession &
-      XContext &
-      CTXACLCommon<Role> & { url: URL; resourceId: string },
-    {
-      OPTIONS: CTXOptionsQuery;
-      HEAD: CTXGetQuery &
-        CTXACLResult<Schema, keyof Schema> & {
-          findFirst?: boolean;
-        };
-      GET: CTXGetQuery &
-        CTXACLResult<Schema, keyof Schema> & {
-          findFirst?: boolean;
-        };
-      POST: CTXPostQuery & CTXPostBody & CTXACLResult<Schema, keyof Schema>;
-      PATCH: CTXPatchQuery & CTXPatchBody & CTXACLResult<Schema, keyof Schema>;
-      DELETE: CTXDeleteQuery & CTXACLResult<Schema, keyof Schema>;
-    }
-  > = {};
+
+  const routes: Routes = {};
   //
   ///// OPTIONS
   //
-  routes.OPTIONS = async (req, _ctx): Promise<Response> => {
+  routes.OPTIONS = async (req): Promise<Response> => {
     try {
       const resourceId = req.params[idParam] as keyof Query as string;
       const url = new URL(req.url);
@@ -884,7 +864,7 @@ export const createQueryRoute = <
         url,
         query,
         resourceId,
-      } as NonNullable<typeof _ctx>;
+      } as NonNullable<CTXOptions>;
       // PARSE SESSION AND AUTHENTICATE
       {
         const res = await parseAuth(req, ctx);
@@ -980,7 +960,7 @@ export const createQueryRoute = <
   //
   ///// GET
   //
-  routes.GET = async (req, _ctx): Promise<Response> => {
+  routes.GET = async (req): Promise<Response> => {
     try {
       const resourceId = req.params[idParam] as keyof Query as string;
       const url = new URL(req.url);
@@ -1000,7 +980,7 @@ export const createQueryRoute = <
         url,
         query,
         resourceId,
-      } as NonNullable<typeof _ctx>;
+      } as NonNullable<CTXGet>;
       // PARSE SESSION AND AUTHENTICATE
       {
         const res = await parseAuth(req, ctx);
@@ -1203,7 +1183,7 @@ export const createQueryRoute = <
   //
   ///// POST
   //
-  routes.POST = async (req, _ctx): Promise<Response> => {
+  routes.POST = async (req): Promise<Response> => {
     try {
       const resourceId = req.params[idParam] as keyof Query as string;
       const url = new URL(req.url);
@@ -1224,7 +1204,7 @@ export const createQueryRoute = <
         query,
         body: undefined,
         resourceId,
-      } as NonNullable<typeof _ctx> & CTXBody;
+      } as NonNullable<CTXPost>;
       {
         const res = parseBody({
           accept: ["application/json", "application/x-www-form-urlencoded"],
@@ -1445,7 +1425,7 @@ export const createQueryRoute = <
   //
   ///// PATCH
   //
-  routes.PATCH = async (req, _ctx): Promise<Response> => {
+  routes.PATCH = async (req): Promise<Response> => {
     try {
       const resourceId = req.params[idParam] as keyof Query as string;
       const url = new URL(req.url);
@@ -1466,7 +1446,7 @@ export const createQueryRoute = <
         query,
         body: undefined,
         resourceId,
-      } as NonNullable<typeof _ctx> & CTXBody;
+      } as NonNullable<CTXPatch> & CTXBody;
       {
         const res = parseBody({
           accept: ["application/json", "application/x-www-form-urlencoded"],
@@ -1677,7 +1657,7 @@ export const createQueryRoute = <
   //
   ///// DELETE
   //
-  routes.DELETE = async (req, _ctx): Promise<Response> => {
+  routes.DELETE = async (req): Promise<Response> => {
     try {
       const resourceId = req.params[idParam] as keyof Query as string;
       const url = new URL(req.url);
@@ -1699,7 +1679,7 @@ export const createQueryRoute = <
         url,
         query,
         resourceId,
-      } as NonNullable<typeof _ctx> & CTXBody;
+      } as NonNullable<CTXDelete> & CTXBody;
       // PARSE SESSION AND AUTHENTICATE
       {
         const res = await parseAuth(req, ctx);

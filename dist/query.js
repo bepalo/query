@@ -130,6 +130,7 @@ var SurpassMaxLimit;
     SurpassMaxLimit[SurpassMaxLimit["Throw"] = 1] = "Throw";
 })(SurpassMaxLimit || (exports.SurpassMaxLimit = SurpassMaxLimit = {}));
 const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = SurpassMaxLimit.Throw, session, defaults, onError, }) => {
+    /////////////////////////////////////////////////////////
     const parseSession = session === null || session === void 0 ? void 0 : session.parser;
     const getRoleFromSession = session === null || session === void 0 ? void 0 : session.getRole;
     const defaultResultFormatter = (_req, ctx) => {
@@ -369,7 +370,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
     //
     ///// OPTIONS
     //
-    routes.OPTIONS = (req, _ctx) => __awaiter(void 0, void 0, void 0, function* () {
+    routes.OPTIONS = (req) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const resourceId = req.params[idParam];
             const url = new URL(req.url);
@@ -463,7 +464,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
     //
     ///// GET
     //
-    routes.GET = (req, _ctx) => __awaiter(void 0, void 0, void 0, function* () {
+    routes.GET = (req) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e, _f, _g;
         try {
             const resourceId = req.params[idParam];
@@ -624,7 +625,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
     //
     ///// POST
     //
-    routes.POST = (req, _ctx) => __awaiter(void 0, void 0, void 0, function* () {
+    routes.POST = (req) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e;
         try {
             const resourceId = req.params[idParam];
@@ -812,7 +813,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
     //
     ///// PATCH
     //
-    routes.PATCH = (req, _ctx) => __awaiter(void 0, void 0, void 0, function* () {
+    routes.PATCH = (req) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e;
         try {
             const resourceId = req.params[idParam];
@@ -984,7 +985,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
     //
     ///// DELETE
     //
-    routes.DELETE = (req, _ctx) => __awaiter(void 0, void 0, void 0, function* () {
+    routes.DELETE = (req) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e;
         try {
             const resourceId = req.params[idParam];
