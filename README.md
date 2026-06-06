@@ -580,13 +580,15 @@ const queryRoute = createQueryRoute<UserRoles, CTXUserSession>({
 // better-auth api endpoint
 const authUrl = new URL(
   process.env.BETTER_AUTH_URL || "http://localhost:4000/api/auth",
-).pathname;
+);
+const authPath = authUrl.pathname === "/" ? "/api/auth" : authUrl.pathname;
+console.log("Better Auth Endpoint:", authPath);
 
 // serve
 const server = Bun.serve({
   port: parseInt(process.env.PORT || "4000"),
   routes: {
-    [`${authUrl}/*`]: auth.handler, // better-auth
+    [`${authPath}/*`]: auth.handler, // better-auth
     "/query/:id": queryRoute, // bepalo-query
   },
 });
