@@ -662,6 +662,7 @@ export default {
           select: true, // allow selection of all columns
           with: {
             user: {
+              select: true,
               forbidQuery: {
                 with: true,
                 offset: true,
@@ -687,6 +688,7 @@ export default {
 
       POST: {
         mine: {
+          select: true,
           // Body Validation using arktype
           validateBody: (b) =>
             createInsertSchema(tables.post).pick("title", "body").assert(b),
@@ -702,6 +704,7 @@ export default {
 
       PATCH: {
         mine: {
+          select: true,
           // Body Validation using arktype
           validateBody: (b) =>
             createUpdateSchema(tables.post).pick("title", "body").assert(b),
@@ -712,6 +715,7 @@ export default {
 
       DELETE: {
         mine: {
+          select: true,
           // row level security
           where: ({ session }, post, { eq }) => eq(post.userId, session.userId),
         },
@@ -891,7 +895,7 @@ Content-Type: application/json
 
 ###
 # @name createPost
-POST {{query}}/posts?countTotal&select=(columns:~T(id,title,body)~)
+POST {{query}}/posts?countTotal&select=(columns:F)
 Content-Type: application/rjson
 
 _(

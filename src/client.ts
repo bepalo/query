@@ -105,7 +105,7 @@ uriCodes[URI_CC4] = "%2B";
 uriCodes[URI_CC5] = "%3F";
 Object.freeze(uriCodes);
 
-export const encodeURIComponentRJSON = (uri: string) => {
+export const encodeURIComponentRJSON = (uri: string): string => {
   if (uri === "") return uri;
   let parts: string[] | undefined = undefined;
   let left = 0;
