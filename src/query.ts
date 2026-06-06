@@ -1,21 +1,163 @@
-import {
-  json,
-  parseBody,
-  status,
-  Status,
-  type CTXBody,
-  type HttpMethod,
-  type RequestHandler,
-} from "@bepalo/router";
-import { ArkErrors, Type, type } from "arktype";
+import { ArkErrors, scope, type } from "arktype";
 import { RJSON } from "@bepalo/rjson";
 import {
   getOperators,
-  SQL,
+  type SQL,
   type InferSelectModel,
   type Operators,
-  type Table,
 } from "drizzle-orm";
+
+export enum Status {
+  _100_Continue = 100,
+  _101_SwitchingProtocols = 101,
+  _102_Processing = 102,
+  _103_EarlyHints = 103,
+  _200_OK = 200,
+  _201_Created = 201,
+  _202_Accepted = 202,
+  _203_NonAuthoritativeInformation = 203,
+  _204_NoContent = 204,
+  _205_ResetContent = 205,
+  _206_PartialContent = 206,
+  _207_MultiStatus = 207,
+  _208_AlreadyReported = 208,
+  _226_IMUsed = 226,
+  _300_MultipleChoices = 300,
+  _301_MovedPermanently = 301,
+  _302_Found = 302,
+  _303_SeeOther = 303,
+  _304_NotModified = 304,
+  _305_UseProxy = 305,
+  _307_TemporaryRedirect = 307,
+  _308_PermanentRedirect = 308,
+  _400_BadRequest = 400,
+  _401_Unauthorized = 401,
+  _402_PaymentRequired = 402,
+  _403_Forbidden = 403,
+  _404_NotFound = 404,
+  _405_MethodNotAllowed = 405,
+  _406_NotAcceptable = 406,
+  _407_ProxyAuthenticationRequired = 407,
+  _408_RequestTimeout = 408,
+  _409_Conflict = 409,
+  _410_Gone = 410,
+  _411_LengthRequired = 411,
+  _412_PreconditionFailed = 412,
+  _413_PayloadTooLarge = 413,
+  _414_URITooLong = 414,
+  _415_UnsupportedMediaType = 415,
+  _416_RangeNotSatisfiable = 416,
+  _417_ExpectationFailed = 417,
+  _418_IMATeapot = 418,
+  _421_MisdirectedRequest = 421,
+  _422_UnprocessableEntity = 422,
+  _423_Locked = 423,
+  _424_FailedDependency = 424,
+  _425_TooEarly = 425,
+  _426_UpgradeRequired = 426,
+  _428_PreconditionRequired = 428,
+  _429_TooManyRequests = 429,
+  _431_RequestHeaderFieldsTooLarge = 431,
+  _451_UnavailableForLegalReasons = 451,
+  _500_InternalServerError = 500,
+  _501_NotImplemented = 501,
+  _502_BadGateway = 502,
+  _503_ServiceUnavailable = 503,
+  _504_GatewayTimeout = 504,
+  _505_HTTPVersionNotSupported = 505,
+  _506_VariantAlsoNegotiates = 506,
+  _507_InsufficientStorage = 507,
+  _508_LoopDetected = 508,
+  _510_NotExtended = 510,
+  _511_NetworkAuthenticationRequired = 511,
+  _419_PageExpired = 419,
+  _420_EnhanceYourCalm = 420,
+  _450_BlockedbyWindowsParentalControls = 450,
+  _498_InvalidToken = 498,
+  _499_TokenRequired = 499,
+  _509_BandwidthLimitExceeded = 509,
+  _526_InvalidSSLCertificate = 526,
+  _529_Siteisoverloaded = 529,
+  _530_Siteisfrozen = 530,
+  _598_NetworkReadTimeoutError = 598,
+  _599_NetworkConnectTimeoutError = 599,
+}
+
+/**
+ * Standard HTTP methods supported by the router.
+ * These methods correspond to HTTP/1.1 request methods.
+ *
+ * @typedef {"HEAD"|"OPTIONS"|"GET"|"POST"|"PUT"|"PATCH"|"DELETE"} HttpMethod
+ *
+ * @example
+ * const method: HttpMethod = "GET";
+ * const method: HttpMethod = "POST";
+ */
+type HttpMethod =
+  | "HEAD"
+  | "OPTIONS"
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "PATCH"
+  | "DELETE";
+
+/**
+ * Request handler type
+ * @callback RequestHandler
+ * @template Context
+ * @param {Request} req - The incoming request
+ * @param {Context} ctx - The request context
+ * @returns {Response|void|Promise<Response|void>} A Response, or void to continue to next handler
+ */
+export interface RequestHandler<Context = any> {
+  (req: Request, ctx: Context): Response | void | Promise<Response | void>;
+}
+
+/**
+ * Creates a JSON Response.
+ * Defaults to status 200 and 'application/json; charset=utf-8' content-type if not specified.
+ * Uses Response.json() internally which automatically serializes the body.
+ * @param {any} body - The data to serialize as JSON
+ * @param {ResponseInit} [init] - Additional response initialization options
+ * @returns {Response} A Response object with application/json content-type
+ * @example
+ * json({ message: "Success" });
+ * json({ error: "Not found" }, { status: 404 });
+ */
+const json = (payload: any, init?: ResponseInit) => {
+  return Response.json(payload, init);
+};
+
+/**
+ * Creates a Response with the specified status code.
+ * Defaults to 'text/plain; charset=utf-8' content-type if not provided in init.headers.
+ * @param {number} status - The HTTP status code
+ * @param {string|null} [content] - The response body content
+ * @param {ResponseInit} [init] - Additional response initialization options
+ * @returns {Response} A Response object
+ * @example
+ * status(200, "Success");
+ * status(404, "Not Found");
+ * status(204, null); // No content response
+ */
+export const status = (
+  status: number,
+  content?: string | null,
+  init?: ResponseInit,
+): Response => {
+  return new Response(content !== undefined ? content : null, {
+    ...init,
+    status,
+  });
+};
+
+export type Table = {
+  _: any;
+  $inferSelect: any;
+  $inferInsert: any;
+  getSQL: any;
+};
 
 export class HttpError extends Error {
   status: number = 500;
@@ -45,11 +187,13 @@ export type InferQuery<Database extends { query: any }> = Database extends {
   : never;
 
 export type ColumnSetting<T extends Table> = {
-  mode: boolean | number;
-  columns: Set<keyof InferSelectModel<T>>;
+  mode?: boolean | number;
+  columns?: Set<keyof InferSelectModel<T>>;
 };
 
 export type CTXACLCommon<Role> = {
+  resourceId: string;
+  findFirst?: boolean;
   userRole?: Role;
 };
 
@@ -77,7 +221,9 @@ export type CTXACLResult<
 };
 
 export type PickTables<Schema extends Record<string, Table | unknown>> = {
-  [K in keyof Schema as Schema[K] extends Table ? K : never]: Schema[K];
+  [K in keyof Schema as Schema[K] extends Table
+    ? K
+    : never]: Schema[K] extends Table ? Schema[K] : never;
 };
 
 export type InferQueryRelationsWith<QueryParams extends { with: any }> =
@@ -88,20 +234,41 @@ export type InferQueryRelations<
   Database extends {
     query: Record<
       keyof Database["query"],
-      { findMany: (...args: any[]) => any }
+      { findFirst: (...args: any[]) => any }
     >;
   },
 > = InferQueryRelationsWith<
-  NonNullable<Parameters<Database["query"][K]["findMany"]>[0]>
+  NonNullable<Parameters<Database["query"][K]["findFirst"]>[0]>
 >;
 
-export type ACLWith<
+export type _ACLWith<
   Context,
   Schema extends Record<string, Table>,
   Database extends { transaction: any; query: any },
   Transaction extends InferTransaction<Database>,
   Query extends InferQuery<Database>,
   K extends keyof Schema,
+  P extends keyof _ACLWith<
+    Context,
+    Schema,
+    Database,
+    Transaction,
+    Query,
+    K,
+    | "forbidQuery"
+    | "maxLimit"
+    | "maxDepth"
+    | "select"
+    | "extras"
+    | "where"
+    | "orderBy"
+    | "with"
+    | "validateBody"
+    | "injectBody"
+    | "beforeQuery"
+    | "afterQuery"
+    | "onQueryError"
+  >,
 > = {
   forbidQuery?: {
     columns?: boolean;
@@ -111,6 +278,9 @@ export type ACLWith<
     orderBy?: boolean;
     with?: boolean;
   };
+
+  maxLimit?: number | null;
+  maxDepth?: number | null;
 
   select?: ColumnSetting<Schema[K]> | boolean;
 
@@ -125,10 +295,7 @@ export type ACLWith<
   with?: {
     [N in keyof Schema as N extends keyof InferQueryRelations<K, Database>
       ? N
-      : never]?: Omit<
-      ACLWith<Context, Schema, Database, Transaction, Query, N>,
-      "forbidQuery"
-    >;
+      : never]?: ACLWith<Context, Schema, Database, Transaction, Query, N, P>;
   };
 
   // used to do custom validation and parsing on body
@@ -141,14 +308,7 @@ export type ACLWith<
     | Promise<Record<string, unknown> | ArkErrors>;
 
   // used to do transform/edit on body
-  injectBody?: <
-    B extends Partial<
-      Record<
-        keyof InferSelectModel<Schema[K]> | string,
-        InferSelectModel<Schema[K]> | unknown
-      >
-    >,
-  >(
+  injectBody?: <B extends Record<string, unknown>>(
     body: B,
     ctx: Context,
   ) =>
@@ -172,6 +332,38 @@ export type ACLWith<
   ) => Response | void | Promise<Response | void>;
 };
 
+export type ACLWith<
+  Context,
+  Schema extends Record<string, Table>,
+  Database extends { transaction: any; query: any },
+  Transaction extends InferTransaction<Database>,
+  Query extends InferQuery<Database>,
+  K extends keyof Schema,
+  P extends keyof _ACLWith<
+    Context,
+    Schema,
+    Database,
+    Transaction,
+    Query,
+    K,
+    | "forbidQuery"
+    | "maxLimit"
+    | "maxDepth"
+    | "select"
+    | "extras"
+    | "where"
+    | "orderBy"
+    | "with"
+    | "validateBody"
+    | "injectBody"
+    | "beforeQuery"
+    | "afterQuery"
+    | "onQueryError"
+  >,
+> = Pick<_ACLWith<Context, Schema, Database, Transaction, Query, K, P>, P> & {
+  formatResult?: RequestHandler<Context>;
+};
+
 export type ACLEntry<
   Role extends string,
   Context,
@@ -183,7 +375,7 @@ export type ACLEntry<
 > = {
   table: K;
   findFirst?: boolean;
-  includeTotal?: boolean;
+  countTotal?: boolean;
   maxLimit?: number | null;
   maxDepth?: number | null;
   formatResult?: RequestHandler<Context>;
@@ -191,60 +383,124 @@ export type ACLEntry<
     HEAD?: Partial<
       Record<
         BASIC_ROLES | Role,
-        Omit<
-          ACLWith<Context, Schema, Database, Transaction, Query, K>,
-          "table" | "validateBody" | "injectBody"
+        ACLWith<
+          Context,
+          Schema,
+          Database,
+          Transaction,
+          Query,
+          K,
+          | "forbidQuery"
+          | "maxLimit"
+          | "maxDepth"
+          | "select"
+          | "where"
+          | "with"
+          | "beforeQuery"
+          | "afterQuery"
+          | "onQueryError"
         >
       >
     >;
     GET?: Partial<
       Record<
         BASIC_ROLES | Role,
-        Omit<
-          ACLWith<Context, Schema, Database, Transaction, Query, K>,
-          "table" | "validateBody" | "injectBody"
+        ACLWith<
+          Context,
+          Schema,
+          Database,
+          Transaction,
+          Query,
+          K,
+          | "forbidQuery"
+          | "maxLimit"
+          | "maxDepth"
+          | "select"
+          | "where"
+          | "with"
+          | "beforeQuery"
+          | "afterQuery"
+          | "onQueryError"
         >
       >
     >;
     POST?: Partial<
       Record<
         BASIC_ROLES | Role,
-        Omit<ACLWith<Context, Schema, Database, Transaction, Query, K>, "table">
+        ACLWith<
+          Context,
+          Schema,
+          Database,
+          Transaction,
+          Query,
+          K,
+          | "forbidQuery"
+          | "select"
+          | "where"
+          | "validateBody"
+          | "injectBody"
+          | "beforeQuery"
+          | "afterQuery"
+          | "onQueryError"
+        >
       >
     >;
     PATCH?: Partial<
       Record<
         BASIC_ROLES | Role,
-        Omit<ACLWith<Context, Schema, Database, Transaction, Query, K>, "table">
+        ACLWith<
+          Context,
+          Schema,
+          Database,
+          Transaction,
+          Query,
+          K,
+          | "forbidQuery"
+          | "select"
+          | "where"
+          | "validateBody"
+          | "injectBody"
+          | "beforeQuery"
+          | "afterQuery"
+          | "onQueryError"
+        >
       >
     >;
     DELETE?: Partial<
       Record<
         BASIC_ROLES | Role,
-        Omit<
-          ACLWith<Context, Schema, Database, Transaction, Query, K>,
-          "table" | "validateBody" | "injectBody"
+        ACLWith<
+          Context,
+          Schema,
+          Database,
+          Transaction,
+          Query,
+          K,
+          | "forbidQuery"
+          | "select"
+          | "where"
+          | "beforeQuery"
+          | "afterQuery"
+          | "onQueryError"
         >
       >
     >;
   };
 };
 
-export type ACL<
+export type _ACL<
   Role extends string,
   CTXSession extends object,
   XContext,
-  Schema extends Record<string, Table | any>,
+  Schema extends Record<string, Table>,
   Database extends { transaction: any; query: any },
   Transaction extends InferTransaction<Database> = InferTransaction<Database>,
   Query extends InferQuery<Database> = InferQuery<Database>,
 > = {
-  [K in keyof PickTables<Schema> as PickTables<Schema>[K] extends Table
-    ? string
-    : never]?: ACLEntry<
+  [K in keyof Schema as Schema[K] extends Table ? string : never]?: ACLEntry<
     Role,
     CTXSession & XContext & CTXACLCommon<Role> & CTXACLResult<Schema, K>,
-    PickTables<Schema>,
+    Schema,
     Database,
     Transaction,
     Query,
@@ -252,49 +508,75 @@ export type ACL<
   >;
 };
 
+export type ACL<
+  Role extends string,
+  CTXSession extends object,
+  XContext,
+  Schema extends Record<string, Table | unknown>,
+  Database extends { transaction: any; query: any },
+  Transaction extends InferTransaction<Database> = InferTransaction<Database>,
+  Query extends InferQuery<Database> = InferQuery<Database>,
+> = _ACL<
+  Role,
+  CTXSession,
+  XContext,
+  PickTables<Schema>,
+  Database,
+  Transaction,
+  Query
+>;
+
 export type Routes = {
   [M in HttpMethod]?: (
     req: Request & { params: Record<string, string> },
   ) => Promise<Response>;
 };
 
-const RJSOnScope = type.scope({
-  Selector: {
+const QueryScope = scope({
+  GetSelector: {
     "offset?": "number",
     "limit?": "number",
     "columns?": "Record<string,boolean> | boolean",
     "where?": "Record<string, unknown> | Record<string, unknown>[]",
     "orderBy?": "Record<string, 'asc' | 'desc' | 1 | -1>",
     "with?": {
-      "[string]": "Selector|boolean",
+      "[string]": "GetSelector|boolean",
     },
+    "+": "reject",
+  },
+  PostSelector: {
+    "columns?": "Record<string,boolean> | boolean",
+    "+": "reject",
+  },
+  PatchSelector: {
+    "columns?": "Record<string,boolean> | boolean",
+    "where?": "Record<string, unknown> | Record<string, unknown>[]",
+    "+": "reject",
+  },
+  DeleteSelector: {
+    "columns?": "Record<string,boolean> | boolean",
+    "where?": "Record<string, unknown> | Record<string, unknown>[]",
     "+": "reject",
   },
 });
 
-export const TSelectorGet: Type<any, any> = RJSOnScope.type("Selector");
+export const TSelectorGet = QueryScope.type("GetSelector");
 
 export type SelectorGet = typeof TSelectorGet.infer;
 
-export const TSelectorPost: Type<any, any> = RJSOnScope.type(
-  "Omit<Selector,'offset'|'limit'|'orderBy'|'where'|'with'>",
-);
+export const TSelectorPost = QueryScope.type("PostSelector");
 
 export type SelectorPost = typeof TSelectorPost.infer;
 
-export const TSelectorPatch: Type<any, any> = RJSOnScope.type(
-  "Omit<Selector,'offset'|'limit'|'orderBy'|'with'>",
-);
+export const TSelectorPatch = QueryScope.type("PatchSelector");
 
 export type SelectorPatch = typeof TSelectorPatch.infer;
 
-export const TSelectorDelete: Type<any, any> = RJSOnScope.type(
-  "Omit<Selector,'offset'|'limit'|'orderBy'|'with'>",
-);
+export const TSelectorDelete = QueryScope.type("DeleteSelector");
 
 export type SelectorDelete = typeof TSelectorDelete.infer;
 
-const TOptionsQuery: Type<any, any> = type(
+const TOptionsQuery = type(
   type({
     "guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
@@ -314,28 +596,26 @@ type CTXOptionsQuery = {
   query: OptionsQuery;
 };
 
-const TGetQuery: Type<any, any> = type(
-  type({
-    "findFirst?": type("'T'|'F'|''")
-      .pipe((args: string) => args.charCodeAt(0) !== 70)
-      .to("boolean"),
-    "guest?": type("'T'|'F'|''")
-      .pipe((args: string) => args.charCodeAt(0) !== 70)
-      .to("boolean"),
-    "mine?": type("'T'|'F'|''")
-      .pipe((args: string) => args.charCodeAt(0) !== 70)
-      .to("boolean"),
-    "mine|guest?": type("'T'|'F'|''")
-      .pipe((args: string) => args.charCodeAt(0) !== 70)
-      .to("boolean"),
-    "includeTotal?": type("'T'|'F'|''")
-      .pipe((args: string) => args.charCodeAt(0) !== 70)
-      .to("boolean"),
-    "select?": type("string")
-      .pipe((args: string) => RJSON.parse(args))
-      .to(TSelectorGet),
-  }),
-);
+const TGetQuery = type({
+  "findFirst?": type("'T'|'F'|''")
+    .pipe((args: string) => args.charCodeAt(0) !== 70)
+    .to("boolean"),
+  "guest?": type("'T'|'F'|''")
+    .pipe((args: string) => args.charCodeAt(0) !== 70)
+    .to("boolean"),
+  "mine?": type("'T'|'F'|''")
+    .pipe((args: string) => args.charCodeAt(0) !== 70)
+    .to("boolean"),
+  "mine|guest?": type("'T'|'F'|''")
+    .pipe((args: string) => args.charCodeAt(0) !== 70)
+    .to("boolean"),
+  "countTotal?": type("'T'|'F'|''")
+    .pipe((args: string) => args.charCodeAt(0) !== 70)
+    .to("boolean"),
+  "select?": type("string")
+    .pipe((args: string) => RJSON.parse(args))
+    .to(TSelectorGet),
+});
 
 export type GetQuery = typeof TGetQuery.infer;
 
@@ -343,7 +623,7 @@ type CTXGetQuery = {
   query: GetQuery;
 };
 
-const TPostQuery: Type<any, any> = type(
+const TPostQuery = type(
   type({
     "guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
@@ -354,7 +634,7 @@ const TPostQuery: Type<any, any> = type(
     "mine|guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
       .to("boolean"),
-    "includeTotal?": type("'T'|'F'|''")
+    "countTotal?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
       .to("boolean"),
     "select?": type("string")
@@ -369,7 +649,7 @@ type CTXPostQuery = {
   query: PostQuery;
 };
 
-export const TPostBody: Type<any, any> = type(
+export const TPostBody = type(
   "Record<string, unknown>|Record<string, unknown>[]",
 );
 
@@ -379,7 +659,7 @@ export type CTXPostBody = {
   body: PostBody;
 };
 
-const TPatchQuery: Type<any, any> = type(
+const TPatchQuery = type(
   type({
     "guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
@@ -390,7 +670,7 @@ const TPatchQuery: Type<any, any> = type(
     "mine|guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
       .to("boolean"),
-    "includeTotal?": type("'T'|'F'|''")
+    "countTotal?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
       .to("boolean"),
     "select?": type("string")
@@ -405,7 +685,7 @@ type CTXPatchQuery = {
   query: PatchQuery;
 };
 
-export const TPatchBody: Type<any, any> = type("Record<string, unknown>");
+export const TPatchBody = type("Record<string, unknown>");
 
 export type PatchBody = typeof TPatchBody.infer;
 
@@ -413,7 +693,7 @@ export type CTXPatchBody = {
   body: PatchBody;
 };
 
-const TDeleteQuery: Type<any, any> = type(
+const TDeleteQuery = type(
   type({
     "guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
@@ -424,7 +704,7 @@ const TDeleteQuery: Type<any, any> = type(
     "mine|guest?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
       .to("boolean"),
-    "includeTotal?": type("'T'|'F'|''")
+    "countTotal?": type("'T'|'F'|''")
       .pipe((args: string) => args.charCodeAt(0) !== 70)
       .to("boolean"),
     "select?": type("string")
@@ -443,6 +723,112 @@ export enum SurpassMaxLimit {
   Limit = 0,
   Throw,
 }
+
+/**
+ * Context object containing parsed request body.
+ * @type {Object} CTXBody
+ * @property {ParsedBody} body - Parsed request body data
+ */
+export type CTXBody = {
+  body: any;
+};
+
+/**
+ * Supported media types for request body parsing.
+ * @type {"application/x-www-form-urlencoded"|"application/json"|"text/plain"} SupportedBodyMediaTypes
+ */
+export type SupportedBodyMediaTypes =
+  | "application/x-www-form-urlencoded"
+  | "application/json"
+  | "application/rjson";
+
+/**
+ * Creates middleware that parses the request body based on Content-Type.
+ * Supports url-encoded forms, JSON, and plain text.
+ * @param {Object} [options] - Configuration options for body parsing
+ * @param {SupportedBodyMediaTypes|SupportedBodyMediaTypes[]} [options.accept] - Media types to accept (defaults to all supported)
+ * @param {number} [options.maxSize] - Maximum body size in bytes (defaults to 1MB)
+ * @param {number} [options.once] - Do not parse if parsed already. checks `ctx.body`
+ * @param {number} [options.clone] - Clone request before parsing it. Useful for forwarding.
+ * @returns {Function} A middleware function that adds parsed body to context.body
+ * @throws {Response} Returns a 415 response if content-type is not accepted
+ * @throws {Response} Returns a 413 response if body exceeds maxSize
+ * @throws {Response} Returns a 400 response if body is malformed
+ */
+export const parseBody = <XContext = Record<string, never>>(options?: {
+  accept?: SupportedBodyMediaTypes | SupportedBodyMediaTypes[]; // defaults to all
+  maxSize?: number; // in bytes
+  once?: boolean;
+  clone?: boolean;
+}): RequestHandler<XContext & CTXBody> => {
+  const accept = options?.accept
+    ? Array.isArray(options.accept)
+      ? options.accept
+      : [options.accept]
+    : ([
+        "application/x-www-form-urlencoded",
+        "application/json",
+        "application/rjson",
+      ] as string[]);
+  const maxSize = options?.maxSize ?? 1024 * 1024; // Default 1MB
+  const once = options?.once;
+  const clone = options?.clone;
+  return async (_req: Request, ctx: XContext & CTXBody) => {
+    if (once && ctx.body) return;
+    const contentType = _req.headers.get("content-type")?.split(";", 2)[0];
+    if (!(contentType && accept.includes(contentType))) {
+      await _req.body?.cancel().catch(() => {});
+      return json(
+        { error: "Unsupported Media Type" },
+        { status: Status._415_UnsupportedMediaType },
+      );
+    }
+    const req = clone ? _req.clone() : _req;
+    try {
+      const contentLengthHeader = req.headers.get("content-length");
+      const contentLength = contentLengthHeader
+        ? parseInt(contentLengthHeader)
+        : undefined;
+      if (contentLength === 0) {
+        ctx.body = undefined;
+        return;
+      }
+      if (contentLength !== undefined && contentLength > maxSize) {
+        await _req.body?.cancel().catch(() => {});
+        return json(
+          { error: "Payload Too Large" },
+          { status: Status._413_PayloadTooLarge },
+        );
+      }
+      switch (contentType) {
+        case "application/x-www-form-urlencoded": {
+          const body = await req.formData();
+          ctx.body = {};
+          for (const [k, v] of body.entries()) {
+            ctx.body[k] = v;
+          }
+          break;
+        }
+        case "application/json": {
+          ctx.body = await req.json();
+          break;
+        }
+        case "application/rjson":
+          ctx.body = RJSON.parse(await req.text());
+          break;
+        default:
+          ctx.body = undefined;
+          break;
+      }
+    } catch {
+      await _req.body?.cancel().catch(() => {});
+      return json(
+        { error: "Malformed Payload" },
+        { status: Status._400_BadRequest },
+      );
+    }
+  };
+};
 
 export const createQueryRoute = <
   Role extends string,
@@ -515,165 +901,212 @@ export const createQueryRoute = <
     CTXSession &
       XContext &
       CTXACLCommon<Role> &
-      CTXACLResult<Schema, keyof Schema> & {
-        resourceId: string;
-        findFirst?: boolean;
-      }
-  > = (_req, ctx) => {
-    const resourceId = ctx.resourceId;
+      CTXACLResult<Schema, keyof Schema>
+  > = (_req, { resourceId, findFirst, result }) => {
     const response: any = {};
-    if (ctx.result) {
-      if (ctx.result.total !== undefined) {
-        response.total = ctx.result.total;
+    if (result) {
+      if (result.total !== undefined) {
+        response.total = result.total;
       }
-      if (ctx.result.rowsAffected != null) {
-        response.rowsAffected = ctx.result.rowsAffected;
+      if (result.rowsAffected != null) {
+        response.rowsAffected = result.rowsAffected;
       }
-      if (ctx.findFirst) {
-        response[resourceId as string] = ctx.result.rows;
+      if (findFirst) {
+        response[resourceId as string] = result.rows;
       } else {
-        response.count = ctx.result.count ?? ctx.result.rows?.length ?? 0;
-        response[resourceId] = ctx.result.rows;
+        response.count = result.count ?? result.rows?.length ?? 0;
+        response[resourceId] = result.rows;
       }
     }
     return json(response);
   };
   const deepCombine = (
     result: Record<string, any>,
+    resourceId: string,
     tableId: string,
     ctx: CTXSession &
       XContext &
       CTXACLCommon<Role> &
       CTXACLResult<Schema, keyof Schema>,
     acl: any,
-    query?: any,
-    maxLimit?: number | null,
-    maxDepth?: number | null,
+    query: any | undefined,
+    aclEntry: ACLEntry<
+      Role,
+      CTXSession & XContext & CTXACLCommon<Role>,
+      Schema,
+      Database,
+      Transaction,
+      Query,
+      keyof Schema
+    >,
+    maxDepth?: number,
     depth: number = 0,
   ) => {
-    if (
-      maxDepth !== null &&
-      (maxDepth !== undefined
-        ? depth > maxDepth
-        : defaults?.maxDepth != null && depth > defaults.maxDepth)
-    ) {
+    // Max Depth
+    {
+      if (acl?.maxDepth != null) {
+        maxDepth = depth + acl.maxDepth;
+      }
+      if (maxDepth != null && depth > maxDepth) {
+        throw new HttpError(
+          `(${resourceId}:${depth}) Max depth surpassed for table '${tableId}'`,
+          Status._400_BadRequest,
+        );
+      }
+    }
+    const forbidQuery = acl?.forbidQuery;
+    // OFFSET & LIMIT
+    {
+      if (query?.offset != null) {
+        if (forbidQuery?.offset) {
+          throw new HttpError(
+            `(${resourceId}:${depth}) query 'select.offset' forbidden by ACL`,
+            Status._400_BadRequest,
+          );
+        }
+        result.offset = query.offset;
+      }
+      if (query?.limit && forbidQuery?.limit) {
+        throw new HttpError(
+          `(${resourceId}:${depth}) query 'select.limit' forbidden by ACL`,
+          Status._400_BadRequest,
+        );
+      }
+      {
+        const aclMaxLimit = acl?.maxLimit;
+        const maxLimit =
+          aclMaxLimit != null
+            ? aclMaxLimit
+            : aclMaxLimit === null
+              ? undefined
+              : aclEntry.maxLimit != null
+                ? aclEntry.maxLimit
+                : aclEntry.maxLimit === null
+                  ? undefined
+                  : defaults?.maxLimit;
+        if (
+          query?.limit > maxLimit &&
+          onSurpassMaxLimit === SurpassMaxLimit.Throw
+        ) {
+          throw new HttpError(
+            `(${resourceId}:${depth}) Max limit surpassed for table '${tableId}'`,
+            Status._400_BadRequest,
+          );
+        }
+        const limit =
+          query?.limit != null
+            ? maxLimit != null
+              ? Math.min(query.limit, maxLimit)
+              : query.limit
+            : maxLimit;
+        if (limit != null) {
+          result.limit = limit;
+        }
+      }
+    }
+    // COLUMNS
+    if (acl?.select) {
+      if (query?.columns != null && forbidQuery?.columns) {
+        throw new HttpError(
+          `(${resourceId}:${depth}) query 'select.columns' forbidden by ACL`,
+          Status._400_BadRequest,
+        );
+      }
+      const queryColumns = typeof query?.columns === "object" && query?.columns;
+      const aclColumns = acl.select?.columns;
+      const aclMode = acl.select?.mode ?? true;
+      const queryBoolean = typeof query?.columns === "boolean";
+      const aclBoolean = typeof acl.select === "boolean";
+      const queryObject = query?.columns && typeof query.columns === "object";
+      const aclObject =
+        acl.select?.columns && typeof acl.select.columns === "object";
+      if (queryBoolean && aclBoolean) {
+        if (query?.columns && !acl.select) {
+          throw new HttpError(
+            `(${resourceId}:${depth}) Column selection forbidden by ACL`,
+            Status._400_BadRequest,
+          );
+        }
+        result.columns = (acl.select ?? true) && (query?.columns ?? true);
+      } else if (queryBoolean) {
+        if (query.columns) {
+          if (aclObject) {
+            result.columns = {};
+            for (const k of aclColumns.keys()) {
+              result.columns[k] = aclMode;
+            }
+          } else {
+            result.columns = true;
+          }
+        } else {
+          result.columns = false;
+        }
+      } else if (aclBoolean) {
+        if (acl.select) {
+          result.columns = queryObject ? { ...queryColumns } : true;
+        } else {
+          result.columns = false;
+        }
+      } else if (queryObject && aclObject) {
+        result.columns = {};
+        const entries = Object.entries(queryColumns);
+        const mode = entries.length > 0 && entries[0][1];
+        if (mode) {
+          for (const [k, v] of entries) {
+            if (v && (aclMode ? !aclColumns.has(k) : aclColumns.has(k))) {
+              throw new HttpError(
+                `(${resourceId}:${depth}) forbidden query field '${k}' of table '${tableId}'`,
+                400,
+              );
+            }
+            result.columns[k] = v;
+          }
+        } else if (aclMode) {
+          for (const k of aclColumns.keys()) {
+            if (queryColumns[k]) {
+              result.columns[k] = true;
+            }
+          }
+        } else {
+          for (const [k, v] of entries) {
+            if (!v) {
+              result.columns[k] = false;
+            }
+          }
+          for (const k of aclColumns.keys()) {
+            result.columns[k] = false;
+          }
+        }
+      } else if (queryColumns) {
+        result.columns = queryObject ? { ...queryColumns } : queryColumns;
+      } else if (aclColumns) {
+        if (aclObject) {
+          result.columns = {};
+          for (const k of aclColumns.keys()) {
+            result.columns[k] = aclMode;
+          }
+        } else {
+          result.columns = true;
+        }
+      }
+      if (result.columns === true) {
+        result.columns = undefined;
+      }
+    } else {
       throw new HttpError(
-        `Max depth surpassed for ${depth === 0 ? "select" : "join"} '${tableId}'`,
+        `(${resourceId}:${depth}) query 'select.columns' disabled by ACL`,
         Status._400_BadRequest,
       );
     }
-    const forbidQuery = acl?.forbidQuery;
-    if (query?.offset != null) {
-      if (forbidQuery?.offset) {
-        throw new HttpError(
-          "query 'select.offset' forbidden by ACL",
-          Status._400_BadRequest,
-        );
-      }
-      result.offset = query.offset;
-    }
-    if (query?.limit) {
-      if (forbidQuery?.limit) {
-        throw new HttpError(
-          "query 'select.limit' forbidden by ACL",
-          Status._400_BadRequest,
-        );
-      }
-      if (
-        maxLimit !== null &&
-        (maxLimit !== undefined
-          ? query.limit > maxLimit
-          : defaults?.maxLimit != null && query.limit > defaults.maxLimit)
-      ) {
-        if (onSurpassMaxLimit === SurpassMaxLimit.Throw) {
-          throw new HttpError(
-            `Max limit surpassed for ${depth === 0 ? "select" : "join"} ${tableId}`,
-            Status._400_BadRequest,
-          );
-        } else if (maxLimit !== undefined) {
-          if (maxLimit !== null) {
-            result.limit = maxLimit;
-          }
-        } else if (defaults?.maxLimit !== undefined) {
-          if (defaults.maxLimit !== null) {
-            result.limit = defaults.maxLimit;
-          }
-        }
-      } else {
-        result.limit = query.limit;
-      }
-    } else if (maxLimit !== undefined) {
-      if (maxLimit !== null) {
-        result.limit = maxLimit;
-      }
-    } else if (defaults?.maxLimit !== undefined) {
-      if (defaults.maxLimit !== null) {
-        result.limit = defaults.maxLimit;
-      }
-    }
-    if (query?.columns != null) {
-      if (forbidQuery?.columns) {
-        throw new HttpError(
-          "query 'select.columns' forbidden by ACL",
-          Status._400_BadRequest,
-        );
-      }
-      if (query.columns === false) {
-        result.columns = {};
-      } else if (query.columns === true) {
-        // const mode = acl.columnMode == null ? true : acl.columnMode;
-        if (typeof acl?.select === "boolean") {
-          if (!acl.select) {
-            result.columns = {};
-          }
-        } else {
-          const mode = acl?.select?.mode ?? true;
-          if (acl?.select?.columns) {
-            result.columns = Object.fromEntries(
-              acl.select.columns.keys().map((k: string) => [k, mode]),
-            );
-          } else if (mode === false) {
-            result.columns = {};
-          }
-        }
-      } else if (acl && (acl.select?.columns || acl.select?.mode)) {
-        result.columns = {};
-        const mode = acl.select?.mode;
-        for (const [key, queryColumn] of Object.entries(query.columns)) {
-          const aclColumn = acl.select?.columns.has(key);
-          if (!queryColumn) {
-            result.columns[key] = false;
-          } else if (!mode ? !aclColumn : aclColumn) {
-            result.columns[key] = queryColumn;
-          } else {
-            throw new HttpError(
-              `forbidden query field '${key}' of table '${tableId}'`,
-              400,
-            );
-          }
-        }
-      } else {
-        result.columns = { ...query.columns };
-      }
-    } else if (typeof acl?.select === "boolean") {
-      if (!acl.select) {
-        result.columns = {};
-      }
-    } else if (acl?.select?.columns) {
-      const mode = acl.select?.mode ?? true;
-      result.columns = Object.fromEntries(
-        acl.select.columns.keys().map((k: string) => [k, mode]),
-      );
-    } else if (acl?.select?.mode === false) {
-      result.columns = {};
-    }
+    // EXTRAS
     if (acl?.extras) {
       result.extras = acl.extras;
     }
+    // WHERE
     if (query?.where) {
       if (forbidQuery?.where) {
         throw new HttpError(
-          "query 'select.where' forbidden by ACL",
+          `(${resourceId}:${depth}) query 'select.where' forbidden by ACL`,
           Status._400_BadRequest,
         );
       }
@@ -693,7 +1126,7 @@ export const createQueryRoute = <
                     ];
                     if (!(field in table)) {
                       throw new HttpError(
-                        `Invalid column in where condition '${field}' here '${key}'`,
+                        `(${resourceId}:${depth}) Invalid column in where condition '${field}' here '${key}'`,
                         Status._400_BadRequest,
                       );
                     }
@@ -702,7 +1135,7 @@ export const createQueryRoute = <
                     const op = operators[operator];
                     if (!op) {
                       throw new HttpError(
-                        `Invalid operator in where condition '${operator}' here '${key}'`,
+                        `(${resourceId}:${depth}) Invalid operator in where condition '${operator}' here '${key}'`,
                         Status._400_BadRequest,
                       );
                     }
@@ -723,7 +1156,7 @@ export const createQueryRoute = <
                 ];
                 if (!(field in table)) {
                   throw new HttpError(
-                    `Invalid column in where condition '${field}' here '${key}'`,
+                    `(${resourceId}:${depth}) Invalid column in where condition '${field}' here '${key}'`,
                     Status._400_BadRequest,
                   );
                 }
@@ -732,7 +1165,7 @@ export const createQueryRoute = <
                 const op = operators[operator];
                 if (!op) {
                   throw new HttpError(
-                    `Invalid operator in where condition '${operator}' here '${key}'`,
+                    `(${resourceId}:${depth}) Invalid operator in where condition '${operator}' here '${key}'`,
                     Status._400_BadRequest,
                   );
                 }
@@ -751,10 +1184,11 @@ export const createQueryRoute = <
       result.where = (table: any, operators: any) =>
         acl.where(ctx, table, operators);
     }
+    //  ORDER BY
     if (query?.orderBy) {
       if (forbidQuery?.orderBy) {
         throw new HttpError(
-          "query 'select.orderBy' forbidden by ACL",
+          `(${resourceId}:${depth}) query 'select.orderBy' forbidden by ACL`,
           Status._400_BadRequest,
         );
       }
@@ -764,7 +1198,7 @@ export const createQueryRoute = <
           const targetField = table[field as keyof typeof table];
           if (!targetField) {
             throw new HttpError(
-              `table column '${tableId}'.'${field}' not found`,
+              `(${resourceId}:${depth}) invalid column '${field}' of table '${tableId}'`,
               400,
             );
           }
@@ -779,7 +1213,7 @@ export const createQueryRoute = <
           const targetField = table[field as keyof typeof table];
           if (!targetField) {
             throw new HttpError(
-              `table column '${tableId}'.'${field}' not found`,
+              `(${resourceId}:${depth}) invalid column '${field}' of table '${tableId}'`,
               400,
             );
           }
@@ -794,7 +1228,7 @@ export const createQueryRoute = <
     if (query?.with) {
       if (forbidQuery?.with) {
         throw new HttpError(
-          "query 'select.with' forbidden by ACL",
+          `(${resourceId}:${depth}) query 'select.with' forbidden by ACL`,
           Status._400_BadRequest,
         );
       }
@@ -807,18 +1241,19 @@ export const createQueryRoute = <
         }
         if (acl?.with && !acl.with[joinedTableId]) {
           throw new HttpError(
-            `Join of '${joinedTableId}' forbidden by ACL`,
+            `(${resourceId}:${depth}) Join of '${joinedTableId}' forbidden by ACL`,
             Status._400_BadRequest,
           );
         }
         result.with[joinedTableId] = {};
         deepCombine(
           result.with[joinedTableId],
+          resourceId,
           joinedTableId,
           ctx,
           acl?.with && acl.with[joinedTableId],
           selector,
-          maxLimit,
+          aclEntry,
           maxDepth,
           depth + 1,
         );
@@ -846,11 +1281,12 @@ export const createQueryRoute = <
     try {
       const resourceId = req.params[idParam] as keyof Query as string;
       const url = new URL(req.url);
-      const query = TOptionsQuery(
-        Object.fromEntries(url.searchParams.entries()),
-      );
+      const queryParams: Record<string, string> = {};
+      for (const [k, v] of url.searchParams.entries()) {
+        queryParams[k] = v;
+      }
+      const query = TOptionsQuery(queryParams);
       if (query instanceof ArkErrors) {
-        // throw new HttpError(query.toString(), Status._400_BadRequest);
         return json(
           {
             error: query.toString() || "Something went wrong",
@@ -876,32 +1312,30 @@ export const createQueryRoute = <
         | ACLEntry<
             Role,
             CTXSession & XContext & CTXACLCommon<Role>,
-            Record<string, Table>,
+            Schema,
             Database,
             Transaction,
             Query,
-            string
+            keyof Schema
           >
         | undefined =
         acl &&
         (acl[resourceId as keyof typeof acl] as ACLEntry<
           Role,
           CTXSession & XContext & CTXACLCommon<Role>,
-          Record<string, Table>,
+          Schema,
           Database,
           Transaction,
           Query,
-          string
+          keyof Schema
         >);
       if (aclEntry == null) {
         return status(Status._404_NotFound, null);
-        // throw new HttpError("Resource not found", Status._404_NotFound);
       }
       const tableId = aclEntry.table;
-      const table = schema[tableId as keyof typeof schema] as Table;
+      const table = (schema as unknown as Schema)[tableId as keyof Schema];
       if (table == null) {
         return status(Status._404_NotFound, null);
-        // throw new HttpError("Table not found", Status._404_NotFound);
       }
       const tablePermissions = aclEntry.control;
       const userRole = ctx.userRole;
@@ -948,7 +1382,10 @@ export const createQueryRoute = <
     } catch (error) {
       return json(
         {
-          error: (error as HttpError).message || "Something went wrong",
+          error:
+            (error as { cause: string }).cause ||
+            (error as HttpError).message ||
+            "Something went wrong",
         },
         {
           status:
@@ -964,9 +1401,12 @@ export const createQueryRoute = <
     try {
       const resourceId = req.params[idParam] as keyof Query as string;
       const url = new URL(req.url);
-      const query = TGetQuery(Object.fromEntries(url.searchParams.entries()));
+      const queryParams: Record<string, string> = {};
+      for (const [k, v] of url.searchParams.entries()) {
+        queryParams[k] = v;
+      }
+      const query = TGetQuery(queryParams);
       if (query instanceof ArkErrors) {
-        // throw new HttpError(query.toString(), Status._400_BadRequest);
         return json(
           {
             error: query.toString() || "Something went wrong",
@@ -993,22 +1433,22 @@ export const createQueryRoute = <
         | ACLEntry<
             Role,
             CTXSession & XContext & CTXACLCommon<Role>,
-            Record<string, Table>,
+            Schema,
             Database,
             Transaction,
             Query,
-            string
+            keyof Schema
           >
         | undefined =
         acl &&
         (acl[resourceId as keyof typeof acl] as ACLEntry<
           Role,
           CTXSession & XContext & CTXACLCommon<Role>,
-          Record<string, Table>,
+          Schema,
           Database,
           Transaction,
           Query,
-          string
+          keyof Schema
         >);
       if (aclEntry == null) {
         return req.method === "HEAD"
@@ -1035,20 +1475,16 @@ export const createQueryRoute = <
                 status: Status._404_NotFound,
               },
             );
-        // throw new HttpError("ACL rule not defined for the method", Status._404_NotFound);
       }
-      const aclSelector = query["mine|guest"]
-        ? ctx.userRole
-          ? (aclRule[ctx.userRole] ??
-            aclRule.mine ??
-            aclRule.all ??
+      const aclSelector =
+        (query["mine|guest"]
+          ? ((ctx.userRole && (aclRule[ctx.userRole] ?? aclRule.mine)) ??
             aclRule.guest)
-          : aclRule.guest
-        : !query.guest && ctx.userRole
-          ? query.mine
-            ? aclRule.mine
-            : (aclRule[ctx.userRole] ?? aclRule.mine ?? aclRule.all)
-          : aclRule.guest;
+          : query.guest
+            ? aclRule.guest
+            : ctx.userRole
+              ? (aclRule[ctx.userRole] ?? aclRule.mine)
+              : aclRule.guest) ?? aclRule.all;
       if (!aclSelector) {
         return json(
           {
@@ -1058,7 +1494,6 @@ export const createQueryRoute = <
             status: Status._403_Forbidden,
           },
         );
-        // throw new HttpError("Resource forbidden", 403);
       }
       if (
         query.findFirst != null &&
@@ -1075,26 +1510,39 @@ export const createQueryRoute = <
             status: Status._403_Forbidden,
           },
         );
-        // throw new HttpError(
-        //   query.findFirst
-        //     ? "find first forbidden by ACL"
-        //     : "find many forbidden by ACL",
-        //   403,
-        // );
       }
       ctx.findFirst = aclEntry.findFirst ?? query.findFirst;
       const tableId = (aclEntry.table as string) || resourceId;
       const selector: Record<string, unknown> = {};
-      deepCombine(
-        selector,
-        tableId,
-        ctx,
-        aclSelector,
-        select,
-        aclEntry.maxLimit,
-        aclEntry.maxDepth,
-      );
-      const formatResult = aclEntry.formatResult ?? defaultResultFormatter;
+      try {
+        deepCombine(
+          selector,
+          resourceId,
+          tableId,
+          ctx,
+          aclSelector,
+          select,
+          aclEntry,
+          aclEntry.maxDepth != null
+            ? aclEntry.maxDepth
+            : aclEntry.maxDepth === null
+              ? undefined
+              : defaults?.maxDepth,
+        );
+      } catch (error) {
+        return json(
+          {
+            error: (error as HttpError).message || "Something went wrong",
+          },
+          {
+            status: (error as HttpError).status || Status._400_BadRequest,
+          },
+        );
+      }
+      const formatResult =
+        aclSelector.formatResult ??
+        aclEntry.formatResult ??
+        defaultResultFormatter;
       try {
         const result = await database.transaction(
           async (tx: Transaction | any) => {
@@ -1104,18 +1552,23 @@ export const createQueryRoute = <
                 ctx as typeof ctx & CTXTX<Transaction>,
               );
             }
-            const table = schema[tableId as keyof typeof schema];
+            const table = (schema as unknown as Schema)[
+              tableId as keyof Schema
+            ];
             const columns = (selector as any).columns;
             const extras = (selector as any).extras;
+            if (columns === true) {
+              selector.columns = undefined;
+            }
             const selecting =
-              columns === undefined ||
-              (typeof columns === "object" &&
-                Object.keys(columns).length > 0) ||
-              (typeof extras === "object" && Object.keys(extras).length > 0);
+              columns !== false ||
+              typeof columns === "object" ||
+              typeof extras == "object";
             const result: any = {
               rows: null,
             };
             if (selecting) {
+              // selector.columns = undefined;
               result.rows = ctx.findFirst
                 ? await tx.query[tableId].findFirst(selector)
                 : await tx.query[tableId].findMany(selector);
@@ -1131,9 +1584,8 @@ export const createQueryRoute = <
                 ? Math.min(limit, count - offset)
                 : count - offset;
             }
-            const includeTotal = query.includeTotal ?? aclEntry.includeTotal;
-            if (includeTotal) {
-              const table = schema[tableId as keyof typeof schema] as Table;
+            const countTotal = query.countTotal ?? aclEntry.countTotal;
+            if (countTotal) {
               const total = await tx.$count(
                 table,
                 aclSelector.where && aclSelector.where(ctx, table, operators),
@@ -1167,7 +1619,10 @@ export const createQueryRoute = <
       onError && onError(error as HttpError | Error);
       return json(
         {
-          error: (error as HttpError).message || "Something went wrong",
+          error:
+            (error as { cause: string }).cause ||
+            (error as HttpError).message ||
+            "Something went wrong",
         },
         {
           status:
@@ -1187,9 +1642,12 @@ export const createQueryRoute = <
     try {
       const resourceId = req.params[idParam] as keyof Query as string;
       const url = new URL(req.url);
-      const query = TPostQuery(Object.fromEntries(url.searchParams.entries()));
+      const queryParams: Record<string, string> = {};
+      for (const [k, v] of url.searchParams.entries()) {
+        queryParams[k] = v;
+      }
+      const query = TPostQuery(queryParams);
       if (query instanceof ArkErrors) {
-        // throw new HttpError(query.toString(), Status._400_BadRequest);
         return json(
           {
             error: query.toString() || "Something went wrong",
@@ -1204,16 +1662,7 @@ export const createQueryRoute = <
         query,
         body: undefined,
         resourceId,
-      } as NonNullable<CTXPost>;
-      {
-        const res = parseBody({
-          accept: ["application/json", "application/x-www-form-urlencoded"],
-          maxSize: 4 * 1024 * 1024,
-        })(req, ctx as any);
-        if (res instanceof Response) {
-          return res;
-        }
-      }
+      } as NonNullable<CTXPost & CTXBody>;
       // PARSE SESSION AND AUTHENTICATE
       {
         const res = await parseAuth(req, ctx);
@@ -1226,22 +1675,22 @@ export const createQueryRoute = <
         | ACLEntry<
             Role,
             CTXSession & XContext & CTXACLCommon<Role>,
-            Record<string, Table>,
+            Schema,
             Database,
             Transaction,
             Query,
-            string
+            keyof Schema
           >
         | undefined =
         acl &&
         (acl[resourceId as keyof typeof acl] as ACLEntry<
           Role,
           CTXSession & XContext & CTXACLCommon<Role>,
-          Record<string, Table>,
+          Schema,
           Database,
           Transaction,
           Query,
-          string
+          keyof Schema
         >);
       if (aclEntry == null) {
         return json(
@@ -1252,7 +1701,6 @@ export const createQueryRoute = <
             status: Status._404_NotFound,
           },
         );
-        // throw new HttpError("Resource not found", Status._404_NotFound);
       }
       const aclRule = aclEntry.control.POST;
       if (aclRule == null) {
@@ -1264,20 +1712,16 @@ export const createQueryRoute = <
             status: Status._404_NotFound,
           },
         );
-        // throw new HttpError(
-        //   "ACL rule not defined for the method",
-        //   Status._404_NotFound,
-        // );
       }
-      const aclSelector = query["mine|guest"]
-        ? ctx.userRole
-          ? (aclRule[ctx.userRole] ?? aclRule.mine ?? aclRule.all)
-          : aclRule.guest
-        : !query.guest && ctx.userRole
-          ? query.mine
-            ? aclRule.mine
-            : (aclRule[ctx.userRole] ?? aclRule.mine ?? aclRule.all)
-          : aclRule.guest;
+      const aclSelector =
+        (query["mine|guest"]
+          ? ((ctx.userRole && (aclRule[ctx.userRole] ?? aclRule.mine)) ??
+            aclRule.guest)
+          : query.guest
+            ? aclRule.guest
+            : ctx.userRole
+              ? (aclRule[ctx.userRole] ?? aclRule.mine)
+              : aclRule.guest) ?? aclRule.all;
       if (!aclSelector) {
         return json(
           {
@@ -1287,19 +1731,48 @@ export const createQueryRoute = <
             status: Status._403_Forbidden,
           },
         );
-        // throw new HttpError("Resource forbidden", 403);
+      }
+      // Parse body
+      {
+        const res = await parseBody<CTXPost>({
+          accept: [
+            "application/json",
+            "application/x-www-form-urlencoded",
+            "application/rjson",
+          ],
+          maxSize: 4 * 1024 * 1024,
+        })(req, ctx);
+        if (res instanceof Response) {
+          return res;
+        }
       }
       const tableId = (aclEntry.table as string) || resourceId;
       const selector: Record<string, unknown> = {};
-      deepCombine(
-        selector,
-        tableId,
-        ctx,
-        aclSelector,
-        select,
-        aclEntry.maxLimit,
-        aclEntry.maxDepth,
-      );
+      try {
+        deepCombine(
+          selector,
+          resourceId,
+          tableId,
+          ctx,
+          aclSelector,
+          select,
+          aclEntry,
+          aclEntry.maxDepth != null
+            ? aclEntry.maxDepth
+            : aclEntry.maxDepth === null
+              ? undefined
+              : defaults?.maxDepth,
+        );
+      } catch (error) {
+        return json(
+          {
+            error: (error as HttpError).message || "Something went wrong",
+          },
+          {
+            status: (error as HttpError).status || Status._400_BadRequest,
+          },
+        );
+      }
       const formatResult = aclEntry.formatResult ?? defaultResultFormatter;
       try {
         const result = await database.transaction(
@@ -1318,7 +1791,6 @@ export const createQueryRoute = <
                   );
                   if (vb instanceof ArkErrors) {
                     throw new HttpError(vb.toString(), Status._400_BadRequest);
-                    // throw vb;
                   }
                   body[i] = vb;
                 }
@@ -1351,23 +1823,47 @@ export const createQueryRoute = <
                 ctx as typeof ctx & CTXTX<Transaction>,
               );
             }
-            const table = schema[tableId as keyof typeof schema] as Table;
-            let columns: Record<string, any> | undefined;
-            // get cached columns selector
-            if (selector.columnsSelector) {
-              columns = selector.columnsSelector;
-            } else if (selector.columns) {
-              columns = {};
-              for (const [key, selectColumn] of Object.entries(
-                selector.columns,
-              )) {
-                if (selectColumn)
-                  columns[key as string] = table[key as keyof typeof table];
-              }
-              selector.columnsSelector = columns;
-            }
+            const table = (schema as unknown as Schema)[
+              tableId as keyof Schema
+            ];
             const result: any = { rows: null };
-            if (columns && Object.keys(columns).length > 0) {
+            if (selector.columns === undefined) {
+              selector.columns = true;
+            }
+            if (selector.columns) {
+              const columns: Record<string, Table[keyof Table]> = {};
+              if (selector.columns === true) {
+                for (const k in table) {
+                  if (k[0] !== "_") {
+                    columns[k] = table[k as keyof typeof table];
+                  }
+                }
+              } else {
+                const columnEntries = Object.entries(selector.columns);
+                const mode = columnEntries.length > 0 && columnEntries[0][1];
+                if (mode) {
+                  for (const [k, v] of columnEntries) {
+                    if (v && k[0] !== "_") {
+                      if (!Object.prototype.hasOwnProperty.call(table, k)) {
+                        throw new HttpError(
+                          `(${resourceId}) Invalid column '${k}' in select query of table '${tableId}'`,
+                          Status._400_BadRequest,
+                        );
+                      }
+                      columns[k] = table[k as keyof typeof table];
+                    }
+                  }
+                } else {
+                  for (const k in table) {
+                    if (
+                      k[0] !== "_" &&
+                      (selector.columns as any)[k] !== false
+                    ) {
+                      columns[k] = table[k as keyof typeof table];
+                    }
+                  }
+                }
+              }
               result.rows = await tx
                 .insert(table)
                 .values(ctx.body)
@@ -1377,9 +1873,8 @@ export const createQueryRoute = <
               const info = await tx.insert(table).values(ctx.body);
               result.rowsAffected = info.rowsAffected;
             }
-            const includeTotal = query.includeTotal ?? aclEntry.includeTotal;
-            if (includeTotal) {
-              const table = schema[tableId as keyof typeof schema] as Table;
+            const countTotal = query.countTotal ?? aclEntry.countTotal;
+            if (countTotal) {
               const total = await tx.$count(
                 table,
                 aclSelector.where && aclSelector.where(ctx, table, operators),
@@ -1413,7 +1908,10 @@ export const createQueryRoute = <
       onError && onError(error as HttpError | Error);
       return json(
         {
-          error: (error as HttpError).message || "Something went wrong",
+          error:
+            (error as { cause: string }).cause ||
+            (error as HttpError).message ||
+            "Something went wrong",
         },
         {
           status:
@@ -1429,9 +1927,12 @@ export const createQueryRoute = <
     try {
       const resourceId = req.params[idParam] as keyof Query as string;
       const url = new URL(req.url);
-      const query = TPatchQuery(Object.fromEntries(url.searchParams.entries()));
+      const queryParams: Record<string, string> = {};
+      for (const [k, v] of url.searchParams.entries()) {
+        queryParams[k] = v;
+      }
+      const query = TPatchQuery(queryParams);
       if (query instanceof ArkErrors) {
-        // throw new HttpError(query.toString(), Status._400_BadRequest);
         return json(
           {
             error: query.toString() || "Something went wrong",
@@ -1447,15 +1948,6 @@ export const createQueryRoute = <
         body: undefined,
         resourceId,
       } as NonNullable<CTXPatch> & CTXBody;
-      {
-        const res = parseBody({
-          accept: ["application/json", "application/x-www-form-urlencoded"],
-          maxSize: 4 * 1024 * 1024,
-        })(req, ctx as any);
-        if (res instanceof Response) {
-          return res;
-        }
-      }
       // PARSE SESSION AND AUTHENTICATE
       {
         const res = await parseAuth(req, ctx);
@@ -1468,22 +1960,22 @@ export const createQueryRoute = <
         | ACLEntry<
             Role,
             CTXSession & XContext & CTXACLCommon<Role>,
-            Record<string, Table>,
+            Schema,
             Database,
             Transaction,
             Query,
-            string
+            keyof Schema
           >
         | undefined =
         acl &&
         (acl[resourceId as keyof typeof acl] as ACLEntry<
           Role,
           CTXSession & XContext & CTXACLCommon<Role>,
-          Record<string, Table>,
+          Schema,
           Database,
           Transaction,
           Query,
-          string
+          keyof Schema
         >);
       if (aclEntry == null) {
         return json(
@@ -1494,7 +1986,6 @@ export const createQueryRoute = <
             status: Status._404_NotFound,
           },
         );
-        // throw new HttpError("Resource not found", Status._404_NotFound);
       }
       const aclRule = aclEntry.control.PATCH;
       if (aclRule == null) {
@@ -1506,20 +1997,16 @@ export const createQueryRoute = <
             status: Status._404_NotFound,
           },
         );
-        // throw new HttpError(
-        //   "ACL rule not defined for the method",
-        //   Status._404_NotFound,
-        // );
       }
-      const aclSelector = query["mine|guest"]
-        ? ctx.userRole
-          ? (aclRule[ctx.userRole] ?? aclRule.mine ?? aclRule.all)
-          : aclRule.guest
-        : !query.guest && ctx.userRole
-          ? query.mine
-            ? aclRule.mine
-            : (aclRule[ctx.userRole] ?? aclRule.mine ?? aclRule.all)
-          : aclRule.guest;
+      const aclSelector =
+        (query["mine|guest"]
+          ? ((ctx.userRole && (aclRule[ctx.userRole] ?? aclRule.mine)) ??
+            aclRule.guest)
+          : query.guest
+            ? aclRule.guest
+            : ctx.userRole
+              ? (aclRule[ctx.userRole] ?? aclRule.mine)
+              : aclRule.guest) ?? aclRule.all;
       if (!aclSelector) {
         return json(
           {
@@ -1529,19 +2016,48 @@ export const createQueryRoute = <
             status: Status._403_Forbidden,
           },
         );
-        // throw new HttpError("Resource forbidden", 403);
+      }
+      // Parse body
+      {
+        const res = await parseBody<CTXPatch>({
+          accept: [
+            "application/json",
+            "application/x-www-form-urlencoded",
+            "application/rjson",
+          ],
+          maxSize: 4 * 1024 * 1024,
+        })(req, ctx);
+        if (res instanceof Response) {
+          return res;
+        }
       }
       const tableId = (aclEntry.table as string) || resourceId;
       const selector: Record<string, unknown> = {};
-      deepCombine(
-        selector,
-        tableId,
-        ctx,
-        aclSelector,
-        select,
-        aclEntry.maxLimit,
-        aclEntry.maxDepth,
-      );
+      try {
+        deepCombine(
+          selector,
+          resourceId,
+          tableId,
+          ctx,
+          aclSelector,
+          select,
+          aclEntry,
+          aclEntry.maxDepth != null
+            ? aclEntry.maxDepth
+            : aclEntry.maxDepth === null
+              ? undefined
+              : defaults?.maxDepth,
+        );
+      } catch (error) {
+        return json(
+          {
+            error: (error as HttpError).message || "Something went wrong",
+          },
+          {
+            status: (error as HttpError).status || Status._400_BadRequest,
+          },
+        );
+      }
       const formatResult = aclEntry.formatResult ?? defaultResultFormatter;
       try {
         const result = await database.transaction(
@@ -1554,7 +2070,6 @@ export const createQueryRoute = <
               const vb = await validateBody(body, ctx);
               if (vb instanceof ArkErrors) {
                 throw new HttpError(vb.toString(), Status._400_BadRequest);
-                // throw vb;
               }
               body = vb;
             }
@@ -1568,23 +2083,47 @@ export const createQueryRoute = <
                 ctx as typeof ctx & CTXTX<Transaction>,
               );
             }
-            const table = schema[tableId as keyof typeof schema] as Table;
-            let columns: Record<string, any> | undefined;
-            // get cached columns selector
-            if (selector.columnsSelector) {
-              columns = selector.columnsSelector;
-            } else if (selector.columns) {
-              columns = {};
-              for (const [key, selectColumn] of Object.entries(
-                selector.columns,
-              )) {
-                if (selectColumn)
-                  columns[key as string] = table[key as keyof typeof table];
-              }
-              selector.columnsSelector = columns;
-            }
+            const table = (schema as unknown as Schema)[
+              tableId as keyof Schema
+            ];
             const result: any = { rows: null };
-            if (columns && Object.keys(columns).length > 0) {
+            if (selector.columns === undefined) {
+              selector.columns = true;
+            }
+            if (selector.columns) {
+              const columns: Record<string, Table[keyof Table]> = {};
+              if (selector.columns === true) {
+                for (const k in table) {
+                  if (k[0] !== "_") {
+                    columns[k] = table[k as keyof typeof table];
+                  }
+                }
+              } else {
+                const columnEntries = Object.entries(selector.columns);
+                const mode = columnEntries.length > 0 && columnEntries[0][1];
+                if (mode) {
+                  for (const [k, v] of columnEntries) {
+                    if (v && k[0] !== "_") {
+                      if (!Object.prototype.hasOwnProperty.call(table, k)) {
+                        throw new HttpError(
+                          `(${resourceId}) Invalid column '${k}' in select query of table '${tableId}'`,
+                          Status._400_BadRequest,
+                        );
+                      }
+                      columns[k] = table[k as keyof typeof table];
+                    }
+                  }
+                } else {
+                  for (const k in table) {
+                    if (
+                      k[0] !== "_" &&
+                      (selector.columns as any)[k] !== false
+                    ) {
+                      columns[k] = table[k as keyof typeof table];
+                    }
+                  }
+                }
+              }
               result.rows = await tx
                 .update(table)
                 .set(ctx.body)
@@ -1609,9 +2148,8 @@ export const createQueryRoute = <
                 );
               result.rowsAffected = info.rowsAffected;
             }
-            const includeTotal = query.includeTotal ?? aclEntry.includeTotal;
-            if (includeTotal) {
-              const table = schema[tableId as keyof typeof schema] as Table;
+            const countTotal = query.countTotal ?? aclEntry.countTotal;
+            if (countTotal) {
               const total = await tx.$count(
                 table,
                 aclSelector.where && aclSelector.where(ctx, table, operators),
@@ -1645,7 +2183,10 @@ export const createQueryRoute = <
       onError && onError(error as HttpError | Error);
       return json(
         {
-          error: (error as HttpError).message || "Something went wrong",
+          error:
+            (error as { cause: string }).cause ||
+            (error as HttpError).message ||
+            "Something went wrong",
         },
         {
           status:
@@ -1661,11 +2202,12 @@ export const createQueryRoute = <
     try {
       const resourceId = req.params[idParam] as keyof Query as string;
       const url = new URL(req.url);
-      const query = TDeleteQuery(
-        Object.fromEntries(url.searchParams.entries()),
-      );
+      const queryParams: Record<string, string> = {};
+      for (const [k, v] of url.searchParams.entries()) {
+        queryParams[k] = v;
+      }
+      const query = TDeleteQuery(queryParams);
       if (query instanceof ArkErrors) {
-        // throw new HttpError(query.toString(), Status._400_BadRequest);
         return json(
           {
             error: query.toString() || "Something went wrong",
@@ -1692,22 +2234,22 @@ export const createQueryRoute = <
         | ACLEntry<
             Role,
             CTXSession & XContext & CTXACLCommon<Role>,
-            Record<string, Table>,
+            Schema,
             Database,
             Transaction,
             Query,
-            string
+            keyof Schema
           >
         | undefined =
         acl &&
         (acl[resourceId as keyof typeof acl] as ACLEntry<
           Role,
           CTXSession & XContext & CTXACLCommon<Role>,
-          Record<string, Table>,
+          Schema,
           Database,
           Transaction,
           Query,
-          string
+          keyof Schema
         >);
       if (aclEntry == null) {
         return json(
@@ -1718,7 +2260,6 @@ export const createQueryRoute = <
             status: Status._404_NotFound,
           },
         );
-        // throw new HttpError("Resource not found", Status._404_NotFound);
       }
       const aclRule = aclEntry.control.DELETE;
       if (aclRule == null) {
@@ -1730,20 +2271,16 @@ export const createQueryRoute = <
             status: Status._404_NotFound,
           },
         );
-        // throw new HttpError(
-        //   "ACL rule not defined for the method",
-        //   Status._404_NotFound,
-        // );
       }
-      const aclSelector = query["mine|guest"]
-        ? ctx.userRole
-          ? (aclRule[ctx.userRole] ?? aclRule.mine ?? aclRule.all)
-          : aclRule.guest
-        : !query.guest && ctx.userRole
-          ? query.mine
-            ? aclRule.mine
-            : (aclRule[ctx.userRole] ?? aclRule.mine ?? aclRule.all)
-          : aclRule.guest;
+      const aclSelector =
+        (query["mine|guest"]
+          ? ((ctx.userRole && (aclRule[ctx.userRole] ?? aclRule.mine)) ??
+            aclRule.guest)
+          : query.guest
+            ? aclRule.guest
+            : ctx.userRole
+              ? (aclRule[ctx.userRole] ?? aclRule.mine)
+              : aclRule.guest) ?? aclRule.all;
       if (!aclSelector) {
         return json(
           {
@@ -1753,19 +2290,34 @@ export const createQueryRoute = <
             status: Status._403_Forbidden,
           },
         );
-        // throw new HttpError("Resource forbidden", 403);
       }
       const tableId = (aclEntry.table as string) || resourceId;
       const selector: Record<string, unknown> = {};
-      deepCombine(
-        selector,
-        tableId,
-        ctx,
-        aclSelector,
-        select,
-        aclEntry.maxLimit,
-        aclEntry.maxDepth,
-      );
+      try {
+        deepCombine(
+          selector,
+          resourceId,
+          tableId,
+          ctx,
+          aclSelector,
+          select,
+          aclEntry,
+          aclEntry.maxDepth != null
+            ? aclEntry.maxDepth
+            : aclEntry.maxDepth === null
+              ? undefined
+              : defaults?.maxDepth,
+        );
+      } catch (error) {
+        return json(
+          {
+            error: (error as HttpError).message || "Something went wrong",
+          },
+          {
+            status: (error as HttpError).status || Status._400_BadRequest,
+          },
+        );
+      }
       const formatResult = aclEntry.formatResult ?? defaultResultFormatter;
       try {
         const result = await database.transaction(
@@ -1776,26 +2328,47 @@ export const createQueryRoute = <
                 ctx as typeof ctx & CTXTX<Transaction>,
               );
             }
-            const table = schema[tableId as keyof typeof schema] as Table;
-            let columns: Record<string, any> | undefined;
-            // get cached columns selector
-            if (selector.columnsSelector) {
-              columns = selector.columnsSelector;
-            } else if (selector.columns) {
-              columns = {};
-              for (const [key, selectColumn] of Object.entries(
-                selector.columns,
-              )) {
-                if (selectColumn)
-                  columns[key as string] = table[key as keyof typeof table];
-              }
-              selector.columnsSelector = columns;
-            }
+            const table = (schema as unknown as Schema)[
+              tableId as keyof Schema
+            ];
             const result: any = { rows: null };
-            if (
-              columns == null ||
-              (typeof columns == "object" && Object.keys(columns).length > 0)
-            ) {
+            if (selector.columns === undefined) {
+              selector.columns = true;
+            }
+            if (selector.columns) {
+              const columns: Record<string, Table[keyof Table]> = {};
+              if (selector.columns === true) {
+                for (const k in table) {
+                  if (k[0] !== "_") {
+                    columns[k] = table[k as keyof typeof table];
+                  }
+                }
+              } else {
+                const columnEntries = Object.entries(selector.columns);
+                const mode = columnEntries.length > 0 && columnEntries[0][1];
+                if (mode) {
+                  for (const [k, v] of columnEntries) {
+                    if (v && k[0] !== "_") {
+                      if (!Object.prototype.hasOwnProperty.call(table, k)) {
+                        throw new HttpError(
+                          `(${resourceId}) Invalid column '${k}' in select query of table '${tableId}'`,
+                          Status._400_BadRequest,
+                        );
+                      }
+                      columns[k] = table[k as keyof typeof table];
+                    }
+                  }
+                } else {
+                  for (const k in table) {
+                    if (
+                      k[0] !== "_" &&
+                      (selector.columns as any)[k] !== false
+                    ) {
+                      columns[k] = table[k as keyof typeof table];
+                    }
+                  }
+                }
+              }
               result.rows = await tx
                 .delete(table)
                 .where(
@@ -1818,9 +2391,8 @@ export const createQueryRoute = <
                 );
               result.rowsAffected = info.rowsAffected;
             }
-            const includeTotal = query.includeTotal ?? aclEntry.includeTotal;
-            if (includeTotal) {
-              const table = schema[tableId as keyof typeof schema] as Table;
+            const countTotal = query.countTotal ?? aclEntry.countTotal;
+            if (countTotal) {
               const total = await tx.$count(
                 table,
                 aclSelector.where && aclSelector.where(ctx, table, operators),
@@ -1854,7 +2426,10 @@ export const createQueryRoute = <
       onError && onError(error as HttpError | Error);
       return json(
         {
-          error: (error as HttpError).message || "Something went wrong",
+          error:
+            (error as { cause: string }).cause ||
+            (error as HttpError).message ||
+            "Something went wrong",
         },
         {
           status:

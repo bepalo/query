@@ -9,11 +9,116 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createQueryRoute = exports.SurpassMaxLimit = exports.TPatchBody = exports.TPostBody = exports.TSelectorDelete = exports.TSelectorPatch = exports.TSelectorPost = exports.TSelectorGet = exports.operators = exports.HttpError = void 0;
-const router_1 = require("@bepalo/router");
+exports.createQueryRoute = exports.parseBody = exports.SurpassMaxLimit = exports.TPatchBody = exports.TPostBody = exports.TSelectorDelete = exports.TSelectorPatch = exports.TSelectorPost = exports.TSelectorGet = exports.operators = exports.HttpError = exports.status = exports.Status = void 0;
 const arktype_1 = require("arktype");
 const rjson_1 = require("@bepalo/rjson");
 const drizzle_orm_1 = require("drizzle-orm");
+var Status;
+(function (Status) {
+    Status[Status["_100_Continue"] = 100] = "_100_Continue";
+    Status[Status["_101_SwitchingProtocols"] = 101] = "_101_SwitchingProtocols";
+    Status[Status["_102_Processing"] = 102] = "_102_Processing";
+    Status[Status["_103_EarlyHints"] = 103] = "_103_EarlyHints";
+    Status[Status["_200_OK"] = 200] = "_200_OK";
+    Status[Status["_201_Created"] = 201] = "_201_Created";
+    Status[Status["_202_Accepted"] = 202] = "_202_Accepted";
+    Status[Status["_203_NonAuthoritativeInformation"] = 203] = "_203_NonAuthoritativeInformation";
+    Status[Status["_204_NoContent"] = 204] = "_204_NoContent";
+    Status[Status["_205_ResetContent"] = 205] = "_205_ResetContent";
+    Status[Status["_206_PartialContent"] = 206] = "_206_PartialContent";
+    Status[Status["_207_MultiStatus"] = 207] = "_207_MultiStatus";
+    Status[Status["_208_AlreadyReported"] = 208] = "_208_AlreadyReported";
+    Status[Status["_226_IMUsed"] = 226] = "_226_IMUsed";
+    Status[Status["_300_MultipleChoices"] = 300] = "_300_MultipleChoices";
+    Status[Status["_301_MovedPermanently"] = 301] = "_301_MovedPermanently";
+    Status[Status["_302_Found"] = 302] = "_302_Found";
+    Status[Status["_303_SeeOther"] = 303] = "_303_SeeOther";
+    Status[Status["_304_NotModified"] = 304] = "_304_NotModified";
+    Status[Status["_305_UseProxy"] = 305] = "_305_UseProxy";
+    Status[Status["_307_TemporaryRedirect"] = 307] = "_307_TemporaryRedirect";
+    Status[Status["_308_PermanentRedirect"] = 308] = "_308_PermanentRedirect";
+    Status[Status["_400_BadRequest"] = 400] = "_400_BadRequest";
+    Status[Status["_401_Unauthorized"] = 401] = "_401_Unauthorized";
+    Status[Status["_402_PaymentRequired"] = 402] = "_402_PaymentRequired";
+    Status[Status["_403_Forbidden"] = 403] = "_403_Forbidden";
+    Status[Status["_404_NotFound"] = 404] = "_404_NotFound";
+    Status[Status["_405_MethodNotAllowed"] = 405] = "_405_MethodNotAllowed";
+    Status[Status["_406_NotAcceptable"] = 406] = "_406_NotAcceptable";
+    Status[Status["_407_ProxyAuthenticationRequired"] = 407] = "_407_ProxyAuthenticationRequired";
+    Status[Status["_408_RequestTimeout"] = 408] = "_408_RequestTimeout";
+    Status[Status["_409_Conflict"] = 409] = "_409_Conflict";
+    Status[Status["_410_Gone"] = 410] = "_410_Gone";
+    Status[Status["_411_LengthRequired"] = 411] = "_411_LengthRequired";
+    Status[Status["_412_PreconditionFailed"] = 412] = "_412_PreconditionFailed";
+    Status[Status["_413_PayloadTooLarge"] = 413] = "_413_PayloadTooLarge";
+    Status[Status["_414_URITooLong"] = 414] = "_414_URITooLong";
+    Status[Status["_415_UnsupportedMediaType"] = 415] = "_415_UnsupportedMediaType";
+    Status[Status["_416_RangeNotSatisfiable"] = 416] = "_416_RangeNotSatisfiable";
+    Status[Status["_417_ExpectationFailed"] = 417] = "_417_ExpectationFailed";
+    Status[Status["_418_IMATeapot"] = 418] = "_418_IMATeapot";
+    Status[Status["_421_MisdirectedRequest"] = 421] = "_421_MisdirectedRequest";
+    Status[Status["_422_UnprocessableEntity"] = 422] = "_422_UnprocessableEntity";
+    Status[Status["_423_Locked"] = 423] = "_423_Locked";
+    Status[Status["_424_FailedDependency"] = 424] = "_424_FailedDependency";
+    Status[Status["_425_TooEarly"] = 425] = "_425_TooEarly";
+    Status[Status["_426_UpgradeRequired"] = 426] = "_426_UpgradeRequired";
+    Status[Status["_428_PreconditionRequired"] = 428] = "_428_PreconditionRequired";
+    Status[Status["_429_TooManyRequests"] = 429] = "_429_TooManyRequests";
+    Status[Status["_431_RequestHeaderFieldsTooLarge"] = 431] = "_431_RequestHeaderFieldsTooLarge";
+    Status[Status["_451_UnavailableForLegalReasons"] = 451] = "_451_UnavailableForLegalReasons";
+    Status[Status["_500_InternalServerError"] = 500] = "_500_InternalServerError";
+    Status[Status["_501_NotImplemented"] = 501] = "_501_NotImplemented";
+    Status[Status["_502_BadGateway"] = 502] = "_502_BadGateway";
+    Status[Status["_503_ServiceUnavailable"] = 503] = "_503_ServiceUnavailable";
+    Status[Status["_504_GatewayTimeout"] = 504] = "_504_GatewayTimeout";
+    Status[Status["_505_HTTPVersionNotSupported"] = 505] = "_505_HTTPVersionNotSupported";
+    Status[Status["_506_VariantAlsoNegotiates"] = 506] = "_506_VariantAlsoNegotiates";
+    Status[Status["_507_InsufficientStorage"] = 507] = "_507_InsufficientStorage";
+    Status[Status["_508_LoopDetected"] = 508] = "_508_LoopDetected";
+    Status[Status["_510_NotExtended"] = 510] = "_510_NotExtended";
+    Status[Status["_511_NetworkAuthenticationRequired"] = 511] = "_511_NetworkAuthenticationRequired";
+    Status[Status["_419_PageExpired"] = 419] = "_419_PageExpired";
+    Status[Status["_420_EnhanceYourCalm"] = 420] = "_420_EnhanceYourCalm";
+    Status[Status["_450_BlockedbyWindowsParentalControls"] = 450] = "_450_BlockedbyWindowsParentalControls";
+    Status[Status["_498_InvalidToken"] = 498] = "_498_InvalidToken";
+    Status[Status["_499_TokenRequired"] = 499] = "_499_TokenRequired";
+    Status[Status["_509_BandwidthLimitExceeded"] = 509] = "_509_BandwidthLimitExceeded";
+    Status[Status["_526_InvalidSSLCertificate"] = 526] = "_526_InvalidSSLCertificate";
+    Status[Status["_529_Siteisoverloaded"] = 529] = "_529_Siteisoverloaded";
+    Status[Status["_530_Siteisfrozen"] = 530] = "_530_Siteisfrozen";
+    Status[Status["_598_NetworkReadTimeoutError"] = 598] = "_598_NetworkReadTimeoutError";
+    Status[Status["_599_NetworkConnectTimeoutError"] = 599] = "_599_NetworkConnectTimeoutError";
+})(Status || (exports.Status = Status = {}));
+/**
+ * Creates a JSON Response.
+ * Defaults to status 200 and 'application/json; charset=utf-8' content-type if not specified.
+ * Uses Response.json() internally which automatically serializes the body.
+ * @param {any} body - The data to serialize as JSON
+ * @param {ResponseInit} [init] - Additional response initialization options
+ * @returns {Response} A Response object with application/json content-type
+ * @example
+ * json({ message: "Success" });
+ * json({ error: "Not found" }, { status: 404 });
+ */
+const json = (payload, init) => {
+    return Response.json(payload, init);
+};
+/**
+ * Creates a Response with the specified status code.
+ * Defaults to 'text/plain; charset=utf-8' content-type if not provided in init.headers.
+ * @param {number} status - The HTTP status code
+ * @param {string|null} [content] - The response body content
+ * @param {ResponseInit} [init] - Additional response initialization options
+ * @returns {Response} A Response object
+ * @example
+ * status(200, "Success");
+ * status(404, "Not Found");
+ * status(204, null); // No content response
+ */
+const status = (status, content, init) => {
+    return new Response(content !== undefined ? content : null, Object.assign(Object.assign({}, init), { status }));
+};
+exports.status = status;
 class HttpError extends Error {
     constructor(message, status) {
         super(message);
@@ -23,23 +128,37 @@ class HttpError extends Error {
 }
 exports.HttpError = HttpError;
 exports.operators = (0, drizzle_orm_1.getOperators)();
-const RJSOnScope = arktype_1.type.scope({
-    Selector: {
+const QueryScope = (0, arktype_1.scope)({
+    GetSelector: {
         "offset?": "number",
         "limit?": "number",
         "columns?": "Record<string,boolean> | boolean",
         "where?": "Record<string, unknown> | Record<string, unknown>[]",
         "orderBy?": "Record<string, 'asc' | 'desc' | 1 | -1>",
         "with?": {
-            "[string]": "Selector|boolean",
+            "[string]": "GetSelector|boolean",
         },
         "+": "reject",
     },
+    PostSelector: {
+        "columns?": "Record<string,boolean> | boolean",
+        "+": "reject",
+    },
+    PatchSelector: {
+        "columns?": "Record<string,boolean> | boolean",
+        "where?": "Record<string, unknown> | Record<string, unknown>[]",
+        "+": "reject",
+    },
+    DeleteSelector: {
+        "columns?": "Record<string,boolean> | boolean",
+        "where?": "Record<string, unknown> | Record<string, unknown>[]",
+        "+": "reject",
+    },
 });
-exports.TSelectorGet = RJSOnScope.type("Selector");
-exports.TSelectorPost = RJSOnScope.type("Omit<Selector,'offset'|'limit'|'orderBy'|'where'|'with'>");
-exports.TSelectorPatch = RJSOnScope.type("Omit<Selector,'offset'|'limit'|'orderBy'|'with'>");
-exports.TSelectorDelete = RJSOnScope.type("Omit<Selector,'offset'|'limit'|'orderBy'|'with'>");
+exports.TSelectorGet = QueryScope.type("GetSelector");
+exports.TSelectorPost = QueryScope.type("PostSelector");
+exports.TSelectorPatch = QueryScope.type("PatchSelector");
+exports.TSelectorDelete = QueryScope.type("DeleteSelector");
 const TOptionsQuery = (0, arktype_1.type)((0, arktype_1.type)({
     "guest?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
@@ -51,7 +170,7 @@ const TOptionsQuery = (0, arktype_1.type)((0, arktype_1.type)({
         .pipe((args) => args.charCodeAt(0) !== 70)
         .to("boolean"),
 }));
-const TGetQuery = (0, arktype_1.type)((0, arktype_1.type)({
+const TGetQuery = (0, arktype_1.type)({
     "findFirst?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
         .to("boolean"),
@@ -64,13 +183,13 @@ const TGetQuery = (0, arktype_1.type)((0, arktype_1.type)({
     "mine|guest?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
         .to("boolean"),
-    "includeTotal?": (0, arktype_1.type)("'T'|'F'|''")
+    "countTotal?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
         .to("boolean"),
     "select?": (0, arktype_1.type)("string")
         .pipe((args) => rjson_1.RJSON.parse(args))
         .to(exports.TSelectorGet),
-}));
+});
 const TPostQuery = (0, arktype_1.type)((0, arktype_1.type)({
     "guest?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
@@ -81,7 +200,7 @@ const TPostQuery = (0, arktype_1.type)((0, arktype_1.type)({
     "mine|guest?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
         .to("boolean"),
-    "includeTotal?": (0, arktype_1.type)("'T'|'F'|''")
+    "countTotal?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
         .to("boolean"),
     "select?": (0, arktype_1.type)("string")
@@ -99,7 +218,7 @@ const TPatchQuery = (0, arktype_1.type)((0, arktype_1.type)({
     "mine|guest?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
         .to("boolean"),
-    "includeTotal?": (0, arktype_1.type)("'T'|'F'|''")
+    "countTotal?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
         .to("boolean"),
     "select?": (0, arktype_1.type)("string")
@@ -117,7 +236,7 @@ const TDeleteQuery = (0, arktype_1.type)((0, arktype_1.type)({
     "mine|guest?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
         .to("boolean"),
-    "includeTotal?": (0, arktype_1.type)("'T'|'F'|''")
+    "countTotal?": (0, arktype_1.type)("'T'|'F'|''")
         .pipe((args) => args.charCodeAt(0) !== 70)
         .to("boolean"),
     "select?": (0, arktype_1.type)("string")
@@ -129,144 +248,257 @@ var SurpassMaxLimit;
     SurpassMaxLimit[SurpassMaxLimit["Limit"] = 0] = "Limit";
     SurpassMaxLimit[SurpassMaxLimit["Throw"] = 1] = "Throw";
 })(SurpassMaxLimit || (exports.SurpassMaxLimit = SurpassMaxLimit = {}));
+/**
+ * Creates middleware that parses the request body based on Content-Type.
+ * Supports url-encoded forms, JSON, and plain text.
+ * @param {Object} [options] - Configuration options for body parsing
+ * @param {SupportedBodyMediaTypes|SupportedBodyMediaTypes[]} [options.accept] - Media types to accept (defaults to all supported)
+ * @param {number} [options.maxSize] - Maximum body size in bytes (defaults to 1MB)
+ * @param {number} [options.once] - Do not parse if parsed already. checks `ctx.body`
+ * @param {number} [options.clone] - Clone request before parsing it. Useful for forwarding.
+ * @returns {Function} A middleware function that adds parsed body to context.body
+ * @throws {Response} Returns a 415 response if content-type is not accepted
+ * @throws {Response} Returns a 413 response if body exceeds maxSize
+ * @throws {Response} Returns a 400 response if body is malformed
+ */
+const parseBody = (options) => {
+    var _a;
+    const accept = (options === null || options === void 0 ? void 0 : options.accept)
+        ? Array.isArray(options.accept)
+            ? options.accept
+            : [options.accept]
+        : [
+            "application/x-www-form-urlencoded",
+            "application/json",
+            "application/rjson",
+        ];
+    const maxSize = (_a = options === null || options === void 0 ? void 0 : options.maxSize) !== null && _a !== void 0 ? _a : 1024 * 1024; // Default 1MB
+    const once = options === null || options === void 0 ? void 0 : options.once;
+    const clone = options === null || options === void 0 ? void 0 : options.clone;
+    return (_req, ctx) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b, _c, _d;
+        if (once && ctx.body)
+            return;
+        const contentType = (_a = _req.headers.get("content-type")) === null || _a === void 0 ? void 0 : _a.split(";", 2)[0];
+        if (!(contentType && accept.includes(contentType))) {
+            yield ((_b = _req.body) === null || _b === void 0 ? void 0 : _b.cancel().catch(() => { }));
+            return json({ error: "Unsupported Media Type" }, { status: Status._415_UnsupportedMediaType });
+        }
+        const req = clone ? _req.clone() : _req;
+        try {
+            const contentLengthHeader = req.headers.get("content-length");
+            const contentLength = contentLengthHeader
+                ? parseInt(contentLengthHeader)
+                : undefined;
+            if (contentLength === 0) {
+                ctx.body = undefined;
+                return;
+            }
+            if (contentLength !== undefined && contentLength > maxSize) {
+                yield ((_c = _req.body) === null || _c === void 0 ? void 0 : _c.cancel().catch(() => { }));
+                return json({ error: "Payload Too Large" }, { status: Status._413_PayloadTooLarge });
+            }
+            switch (contentType) {
+                case "application/x-www-form-urlencoded": {
+                    const body = yield req.formData();
+                    ctx.body = {};
+                    for (const [k, v] of body.entries()) {
+                        ctx.body[k] = v;
+                    }
+                    break;
+                }
+                case "application/json": {
+                    ctx.body = yield req.json();
+                    break;
+                }
+                case "application/rjson":
+                    ctx.body = rjson_1.RJSON.parse(yield req.text());
+                    break;
+                default:
+                    ctx.body = undefined;
+                    break;
+            }
+        }
+        catch (_e) {
+            yield ((_d = _req.body) === null || _d === void 0 ? void 0 : _d.cancel().catch(() => { }));
+            return json({ error: "Malformed Payload" }, { status: Status._400_BadRequest });
+        }
+    });
+};
+exports.parseBody = parseBody;
 const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = SurpassMaxLimit.Throw, session, defaults, onError, }) => {
     /////////////////////////////////////////////////////////
     const parseSession = session === null || session === void 0 ? void 0 : session.parser;
     const getRoleFromSession = session === null || session === void 0 ? void 0 : session.getRole;
-    const defaultResultFormatter = (_req, ctx) => {
+    const defaultResultFormatter = (_req, { resourceId, findFirst, result }) => {
         var _a, _b, _c;
-        const resourceId = ctx.resourceId;
         const response = {};
-        if (ctx.result) {
-            if (ctx.result.total !== undefined) {
-                response.total = ctx.result.total;
+        if (result) {
+            if (result.total !== undefined) {
+                response.total = result.total;
             }
-            if (ctx.result.rowsAffected != null) {
-                response.rowsAffected = ctx.result.rowsAffected;
+            if (result.rowsAffected != null) {
+                response.rowsAffected = result.rowsAffected;
             }
-            if (ctx.findFirst) {
-                response[resourceId] = ctx.result.rows;
+            if (findFirst) {
+                response[resourceId] = result.rows;
             }
             else {
-                response.count = (_c = (_a = ctx.result.count) !== null && _a !== void 0 ? _a : (_b = ctx.result.rows) === null || _b === void 0 ? void 0 : _b.length) !== null && _c !== void 0 ? _c : 0;
-                response[resourceId] = ctx.result.rows;
+                response.count = (_c = (_a = result.count) !== null && _a !== void 0 ? _a : (_b = result.rows) === null || _b === void 0 ? void 0 : _b.length) !== null && _c !== void 0 ? _c : 0;
+                response[resourceId] = result.rows;
             }
         }
-        return (0, router_1.json)(response);
+        return json(response);
     };
-    const deepCombine = (result, tableId, ctx, acl, query, maxLimit, maxDepth, depth = 0) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
-        if (maxDepth !== null &&
-            (maxDepth !== undefined
-                ? depth > maxDepth
-                : (defaults === null || defaults === void 0 ? void 0 : defaults.maxDepth) != null && depth > defaults.maxDepth)) {
-            throw new HttpError(`Max depth surpassed for ${depth === 0 ? "select" : "join"} '${tableId}'`, router_1.Status._400_BadRequest);
+    const deepCombine = (result, resourceId, tableId, ctx, acl, query, aclEntry, maxDepth, depth = 0) => {
+        var _a, _b, _c, _d, _e, _f;
+        // Max Depth
+        {
+            if ((acl === null || acl === void 0 ? void 0 : acl.maxDepth) != null) {
+                maxDepth = depth + acl.maxDepth;
+            }
+            if (maxDepth != null && depth > maxDepth) {
+                throw new HttpError(`(${resourceId}:${depth}) Max depth surpassed for table '${tableId}'`, Status._400_BadRequest);
+            }
         }
         const forbidQuery = acl === null || acl === void 0 ? void 0 : acl.forbidQuery;
-        if ((query === null || query === void 0 ? void 0 : query.offset) != null) {
-            if (forbidQuery === null || forbidQuery === void 0 ? void 0 : forbidQuery.offset) {
-                throw new HttpError("query 'select.offset' forbidden by ACL", router_1.Status._400_BadRequest);
-            }
-            result.offset = query.offset;
-        }
-        if (query === null || query === void 0 ? void 0 : query.limit) {
-            if (forbidQuery === null || forbidQuery === void 0 ? void 0 : forbidQuery.limit) {
-                throw new HttpError("query 'select.limit' forbidden by ACL", router_1.Status._400_BadRequest);
-            }
-            if (maxLimit !== null &&
-                (maxLimit !== undefined
-                    ? query.limit > maxLimit
-                    : (defaults === null || defaults === void 0 ? void 0 : defaults.maxLimit) != null && query.limit > defaults.maxLimit)) {
-                if (onSurpassMaxLimit === SurpassMaxLimit.Throw) {
-                    throw new HttpError(`Max limit surpassed for ${depth === 0 ? "select" : "join"} ${tableId}`, router_1.Status._400_BadRequest);
+        // OFFSET & LIMIT
+        {
+            if ((query === null || query === void 0 ? void 0 : query.offset) != null) {
+                if (forbidQuery === null || forbidQuery === void 0 ? void 0 : forbidQuery.offset) {
+                    throw new HttpError(`(${resourceId}:${depth}) query 'select.offset' forbidden by ACL`, Status._400_BadRequest);
                 }
-                else if (maxLimit !== undefined) {
-                    if (maxLimit !== null) {
-                        result.limit = maxLimit;
-                    }
+                result.offset = query.offset;
+            }
+            if ((query === null || query === void 0 ? void 0 : query.limit) && (forbidQuery === null || forbidQuery === void 0 ? void 0 : forbidQuery.limit)) {
+                throw new HttpError(`(${resourceId}:${depth}) query 'select.limit' forbidden by ACL`, Status._400_BadRequest);
+            }
+            {
+                const aclMaxLimit = acl === null || acl === void 0 ? void 0 : acl.maxLimit;
+                const maxLimit = aclMaxLimit != null
+                    ? aclMaxLimit
+                    : aclMaxLimit === null
+                        ? undefined
+                        : aclEntry.maxLimit != null
+                            ? aclEntry.maxLimit
+                            : aclEntry.maxLimit === null
+                                ? undefined
+                                : defaults === null || defaults === void 0 ? void 0 : defaults.maxLimit;
+                if ((query === null || query === void 0 ? void 0 : query.limit) > maxLimit &&
+                    onSurpassMaxLimit === SurpassMaxLimit.Throw) {
+                    throw new HttpError(`(${resourceId}:${depth}) Max limit surpassed for table '${tableId}'`, Status._400_BadRequest);
                 }
-                else if ((defaults === null || defaults === void 0 ? void 0 : defaults.maxLimit) !== undefined) {
-                    if (defaults.maxLimit !== null) {
-                        result.limit = defaults.maxLimit;
-                    }
+                const limit = (query === null || query === void 0 ? void 0 : query.limit) != null
+                    ? maxLimit != null
+                        ? Math.min(query.limit, maxLimit)
+                        : query.limit
+                    : maxLimit;
+                if (limit != null) {
+                    result.limit = limit;
                 }
             }
-            else {
-                result.limit = query.limit;
-            }
         }
-        else if (maxLimit !== undefined) {
-            if (maxLimit !== null) {
-                result.limit = maxLimit;
+        // COLUMNS
+        if (acl === null || acl === void 0 ? void 0 : acl.select) {
+            if ((query === null || query === void 0 ? void 0 : query.columns) != null && (forbidQuery === null || forbidQuery === void 0 ? void 0 : forbidQuery.columns)) {
+                throw new HttpError(`(${resourceId}:${depth}) query 'select.columns' forbidden by ACL`, Status._400_BadRequest);
             }
-        }
-        else if ((defaults === null || defaults === void 0 ? void 0 : defaults.maxLimit) !== undefined) {
-            if (defaults.maxLimit !== null) {
-                result.limit = defaults.maxLimit;
+            const queryColumns = typeof (query === null || query === void 0 ? void 0 : query.columns) === "object" && (query === null || query === void 0 ? void 0 : query.columns);
+            const aclColumns = (_a = acl.select) === null || _a === void 0 ? void 0 : _a.columns;
+            const aclMode = (_c = (_b = acl.select) === null || _b === void 0 ? void 0 : _b.mode) !== null && _c !== void 0 ? _c : true;
+            const queryBoolean = typeof (query === null || query === void 0 ? void 0 : query.columns) === "boolean";
+            const aclBoolean = typeof acl.select === "boolean";
+            const queryObject = (query === null || query === void 0 ? void 0 : query.columns) && typeof query.columns === "object";
+            const aclObject = ((_d = acl.select) === null || _d === void 0 ? void 0 : _d.columns) && typeof acl.select.columns === "object";
+            if (queryBoolean && aclBoolean) {
+                if ((query === null || query === void 0 ? void 0 : query.columns) && !acl.select) {
+                    throw new HttpError(`(${resourceId}:${depth}) Column selection forbidden by ACL`, Status._400_BadRequest);
+                }
+                result.columns = ((_e = acl.select) !== null && _e !== void 0 ? _e : true) && ((_f = query === null || query === void 0 ? void 0 : query.columns) !== null && _f !== void 0 ? _f : true);
             }
-        }
-        if ((query === null || query === void 0 ? void 0 : query.columns) != null) {
-            if (forbidQuery === null || forbidQuery === void 0 ? void 0 : forbidQuery.columns) {
-                throw new HttpError("query 'select.columns' forbidden by ACL", router_1.Status._400_BadRequest);
-            }
-            if (query.columns === false) {
-                result.columns = {};
-            }
-            else if (query.columns === true) {
-                // const mode = acl.columnMode == null ? true : acl.columnMode;
-                if (typeof (acl === null || acl === void 0 ? void 0 : acl.select) === "boolean") {
-                    if (!acl.select) {
+            else if (queryBoolean) {
+                if (query.columns) {
+                    if (aclObject) {
                         result.columns = {};
+                        for (const k of aclColumns.keys()) {
+                            result.columns[k] = aclMode;
+                        }
+                    }
+                    else {
+                        result.columns = true;
                     }
                 }
                 else {
-                    const mode = (_b = (_a = acl === null || acl === void 0 ? void 0 : acl.select) === null || _a === void 0 ? void 0 : _a.mode) !== null && _b !== void 0 ? _b : true;
-                    if ((_c = acl === null || acl === void 0 ? void 0 : acl.select) === null || _c === void 0 ? void 0 : _c.columns) {
-                        result.columns = Object.fromEntries(acl.select.columns.keys().map((k) => [k, mode]));
+                    result.columns = false;
+                }
+            }
+            else if (aclBoolean) {
+                if (acl.select) {
+                    result.columns = queryObject ? Object.assign({}, queryColumns) : true;
+                }
+                else {
+                    result.columns = false;
+                }
+            }
+            else if (queryObject && aclObject) {
+                result.columns = {};
+                const entries = Object.entries(queryColumns);
+                const mode = entries.length > 0 && entries[0][1];
+                if (mode) {
+                    for (const [k, v] of entries) {
+                        if (v && (aclMode ? !aclColumns.has(k) : aclColumns.has(k))) {
+                            throw new HttpError(`(${resourceId}:${depth}) forbidden query field '${k}' of table '${tableId}'`, 400);
+                        }
+                        result.columns[k] = v;
                     }
-                    else if (mode === false) {
-                        result.columns = {};
+                }
+                else if (aclMode) {
+                    for (const k of aclColumns.keys()) {
+                        if (queryColumns[k]) {
+                            result.columns[k] = true;
+                        }
+                    }
+                }
+                else {
+                    for (const [k, v] of entries) {
+                        if (!v) {
+                            result.columns[k] = false;
+                        }
+                    }
+                    for (const k of aclColumns.keys()) {
+                        result.columns[k] = false;
                     }
                 }
             }
-            else if (acl && (((_d = acl.select) === null || _d === void 0 ? void 0 : _d.columns) || ((_e = acl.select) === null || _e === void 0 ? void 0 : _e.mode))) {
-                result.columns = {};
-                const mode = (_f = acl.select) === null || _f === void 0 ? void 0 : _f.mode;
-                for (const [key, queryColumn] of Object.entries(query.columns)) {
-                    const aclColumn = (_g = acl.select) === null || _g === void 0 ? void 0 : _g.columns.has(key);
-                    if (!queryColumn) {
-                        result.columns[key] = false;
-                    }
-                    else if (!mode ? !aclColumn : aclColumn) {
-                        result.columns[key] = queryColumn;
-                    }
-                    else {
-                        throw new HttpError(`forbidden query field '${key}' of table '${tableId}'`, 400);
+            else if (queryColumns) {
+                result.columns = queryObject ? Object.assign({}, queryColumns) : queryColumns;
+            }
+            else if (aclColumns) {
+                if (aclObject) {
+                    result.columns = {};
+                    for (const k of aclColumns.keys()) {
+                        result.columns[k] = aclMode;
                     }
                 }
+                else {
+                    result.columns = true;
+                }
             }
-            else {
-                result.columns = Object.assign({}, query.columns);
-            }
-        }
-        else if (typeof (acl === null || acl === void 0 ? void 0 : acl.select) === "boolean") {
-            if (!acl.select) {
-                result.columns = {};
+            if (result.columns === true) {
+                result.columns = undefined;
             }
         }
-        else if ((_h = acl === null || acl === void 0 ? void 0 : acl.select) === null || _h === void 0 ? void 0 : _h.columns) {
-            const mode = (_k = (_j = acl.select) === null || _j === void 0 ? void 0 : _j.mode) !== null && _k !== void 0 ? _k : true;
-            result.columns = Object.fromEntries(acl.select.columns.keys().map((k) => [k, mode]));
+        else {
+            throw new HttpError(`(${resourceId}:${depth}) query 'select.columns' disabled by ACL`, Status._400_BadRequest);
         }
-        else if (((_l = acl === null || acl === void 0 ? void 0 : acl.select) === null || _l === void 0 ? void 0 : _l.mode) === false) {
-            result.columns = {};
-        }
+        // EXTRAS
         if (acl === null || acl === void 0 ? void 0 : acl.extras) {
             result.extras = acl.extras;
         }
+        // WHERE
         if (query === null || query === void 0 ? void 0 : query.where) {
             if (forbidQuery === null || forbidQuery === void 0 ? void 0 : forbidQuery.where) {
-                throw new HttpError("query 'select.where' forbidden by ACL", router_1.Status._400_BadRequest);
+                throw new HttpError(`(${resourceId}:${depth}) query 'select.where' forbidden by ACL`, Status._400_BadRequest);
             }
             const isArray = Array.isArray(query.where);
             const sWhere = isArray
@@ -277,28 +509,28 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                     ? operators.or(...sWhere.map((orWhere) => operators.and(...orWhere.map(([key, value]) => {
                         let [field, operator] = key.split(".", 2);
                         if (!(field in table)) {
-                            throw new HttpError(`Invalid column in where condition '${field}' here '${key}'`, router_1.Status._400_BadRequest);
+                            throw new HttpError(`(${resourceId}:${depth}) Invalid column in where condition '${field}' here '${key}'`, Status._400_BadRequest);
                         }
                         const fieldSel = table[field];
                         if (!operator)
                             operator = "eq";
                         const op = operators[operator];
                         if (!op) {
-                            throw new HttpError(`Invalid operator in where condition '${operator}' here '${key}'`, router_1.Status._400_BadRequest);
+                            throw new HttpError(`(${resourceId}:${depth}) Invalid operator in where condition '${operator}' here '${key}'`, Status._400_BadRequest);
                         }
                         return op(fieldSel, fieldSel.dataType === "date" ? new Date(value) : value);
                     }))))
                     : operators.and((acl === null || acl === void 0 ? void 0 : acl.where) && acl.where(ctx, table, operators), ...sWhere.map(([key, value]) => {
                         let [field, operator] = key.split(".", 2);
                         if (!(field in table)) {
-                            throw new HttpError(`Invalid column in where condition '${field}' here '${key}'`, router_1.Status._400_BadRequest);
+                            throw new HttpError(`(${resourceId}:${depth}) Invalid column in where condition '${field}' here '${key}'`, Status._400_BadRequest);
                         }
                         const fieldSel = table[field];
                         if (!operator)
                             operator = "eq";
                         const op = operators[operator];
                         if (!op) {
-                            throw new HttpError(`Invalid operator in where condition '${operator}' here '${key}'`, router_1.Status._400_BadRequest);
+                            throw new HttpError(`(${resourceId}:${depth}) Invalid operator in where condition '${operator}' here '${key}'`, Status._400_BadRequest);
                         }
                         return op(fieldSel, fieldSel.dataType === "date" ? new Date(value) : value);
                     }));
@@ -311,15 +543,16 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         else if (acl === null || acl === void 0 ? void 0 : acl.where) {
             result.where = (table, operators) => acl.where(ctx, table, operators);
         }
+        //  ORDER BY
         if (query === null || query === void 0 ? void 0 : query.orderBy) {
             if (forbidQuery === null || forbidQuery === void 0 ? void 0 : forbidQuery.orderBy) {
-                throw new HttpError("query 'select.orderBy' forbidden by ACL", router_1.Status._400_BadRequest);
+                throw new HttpError(`(${resourceId}:${depth}) query 'select.orderBy' forbidden by ACL`, Status._400_BadRequest);
             }
             const orderBy = Object.entries(Object.assign({}, query.orderBy));
             result.orderBy = (table, operators) => orderBy.map(([field, opname]) => {
                 const targetField = table[field];
                 if (!targetField) {
-                    throw new HttpError(`table column '${tableId}'.'${field}' not found`, 400);
+                    throw new HttpError(`(${resourceId}:${depth}) invalid column '${field}' of table '${tableId}'`, 400);
                 }
                 const op = opname === 1 || opname === "asc" ? operators.asc : operators.desc;
                 return op(targetField);
@@ -330,7 +563,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
             result.orderBy = (table, operators) => orderBy.map(([field, opname]) => {
                 const targetField = table[field];
                 if (!targetField) {
-                    throw new HttpError(`table column '${tableId}'.'${field}' not found`, 400);
+                    throw new HttpError(`(${resourceId}:${depth}) invalid column '${field}' of table '${tableId}'`, 400);
                 }
                 const op = opname.charAt(0) === "1" ||
                     opname.charAt(0) === "a"
@@ -341,7 +574,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         }
         if (query === null || query === void 0 ? void 0 : query.with) {
             if (forbidQuery === null || forbidQuery === void 0 ? void 0 : forbidQuery.with) {
-                throw new HttpError("query 'select.with' forbidden by ACL", router_1.Status._400_BadRequest);
+                throw new HttpError(`(${resourceId}:${depth}) query 'select.with' forbidden by ACL`, Status._400_BadRequest);
             }
             result.with = {};
             for (const [joinedTableId, selector] of Object.entries(query.with)) {
@@ -349,10 +582,10 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                     continue;
                 }
                 if ((acl === null || acl === void 0 ? void 0 : acl.with) && !acl.with[joinedTableId]) {
-                    throw new HttpError(`Join of '${joinedTableId}' forbidden by ACL`, router_1.Status._400_BadRequest);
+                    throw new HttpError(`(${resourceId}:${depth}) Join of '${joinedTableId}' forbidden by ACL`, Status._400_BadRequest);
                 }
                 result.with[joinedTableId] = {};
-                deepCombine(result.with[joinedTableId], joinedTableId, ctx, (acl === null || acl === void 0 ? void 0 : acl.with) && acl.with[joinedTableId], selector, maxLimit, maxDepth, depth + 1);
+                deepCombine(result.with[joinedTableId], resourceId, joinedTableId, ctx, (acl === null || acl === void 0 ? void 0 : acl.with) && acl.with[joinedTableId], selector, aclEntry, maxDepth, depth + 1);
             }
         }
         return result;
@@ -374,13 +607,16 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         try {
             const resourceId = req.params[idParam];
             const url = new URL(req.url);
-            const query = TOptionsQuery(Object.fromEntries(url.searchParams.entries()));
+            const queryParams = {};
+            for (const [k, v] of url.searchParams.entries()) {
+                queryParams[k] = v;
+            }
+            const query = TOptionsQuery(queryParams);
             if (query instanceof arktype_1.ArkErrors) {
-                // throw new HttpError(query.toString(), Status._400_BadRequest);
-                return (0, router_1.json)({
+                return json({
                     error: query.toString() || "Something went wrong",
                 }, {
-                    status: router_1.Status._400_BadRequest,
+                    status: Status._400_BadRequest,
                 });
             }
             const ctx = {
@@ -398,14 +634,12 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
             const aclEntry = acl &&
                 acl[resourceId];
             if (aclEntry == null) {
-                return (0, router_1.status)(router_1.Status._404_NotFound, null);
-                // throw new HttpError("Resource not found", Status._404_NotFound);
+                return (0, exports.status)(Status._404_NotFound, null);
             }
             const tableId = aclEntry.table;
             const table = schema[tableId];
             if (table == null) {
-                return (0, router_1.status)(router_1.Status._404_NotFound, null);
-                // throw new HttpError("Table not found", Status._404_NotFound);
+                return (0, exports.status)(Status._404_NotFound, null);
             }
             const tablePermissions = aclEntry.control;
             const userRole = ctx.userRole;
@@ -449,15 +683,17 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
             else {
                 headers.append("Allow", `OPTIONS`);
             }
-            return (0, router_1.status)(router_1.Status._204_NoContent, null, {
+            return (0, exports.status)(Status._204_NoContent, null, {
                 headers,
             });
         }
         catch (error) {
-            return (0, router_1.json)({
-                error: error.message || "Something went wrong",
+            return json({
+                error: error.cause ||
+                    error.message ||
+                    "Something went wrong",
             }, {
-                status: error.status || router_1.Status._500_InternalServerError,
+                status: error.status || Status._500_InternalServerError,
             });
         }
     });
@@ -469,13 +705,16 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         try {
             const resourceId = req.params[idParam];
             const url = new URL(req.url);
-            const query = TGetQuery(Object.fromEntries(url.searchParams.entries()));
+            const queryParams = {};
+            for (const [k, v] of url.searchParams.entries()) {
+                queryParams[k] = v;
+            }
+            const query = TGetQuery(queryParams);
             if (query instanceof arktype_1.ArkErrors) {
-                // throw new HttpError(query.toString(), Status._400_BadRequest);
-                return (0, router_1.json)({
+                return json({
                     error: query.toString() || "Something went wrong",
                 }, {
-                    status: router_1.Status._400_BadRequest,
+                    status: Status._400_BadRequest,
                 });
             }
             const ctx = {
@@ -495,64 +734,67 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                 acl[resourceId];
             if (aclEntry == null) {
                 return req.method === "HEAD"
-                    ? (0, router_1.status)(router_1.Status._404_NotFound, null)
-                    : (0, router_1.json)({
+                    ? (0, exports.status)(Status._404_NotFound, null)
+                    : json({
                         error: "Resource not found",
                     }, {
-                        status: router_1.Status._404_NotFound,
+                        status: Status._404_NotFound,
                     });
                 // throw new HttpError("Resource not found", Status._404_NotFound);
             }
             const aclRule = aclEntry.control.GET;
             if (aclRule == null) {
                 return req.method === "HEAD"
-                    ? (0, router_1.status)(router_1.Status._404_NotFound, null)
-                    : (0, router_1.json)({
+                    ? (0, exports.status)(Status._404_NotFound, null)
+                    : json({
                         error: "ACL rule not defined for the method for the method",
                     }, {
-                        status: router_1.Status._404_NotFound,
+                        status: Status._404_NotFound,
                     });
-                // throw new HttpError("ACL rule not defined for the method", Status._404_NotFound);
             }
-            const aclSelector = query["mine|guest"]
-                ? ctx.userRole
-                    ? ((_c = (_b = (_a = aclRule[ctx.userRole]) !== null && _a !== void 0 ? _a : aclRule.mine) !== null && _b !== void 0 ? _b : aclRule.all) !== null && _c !== void 0 ? _c : aclRule.guest)
-                    : aclRule.guest
-                : !query.guest && ctx.userRole
-                    ? query.mine
-                        ? aclRule.mine
-                        : ((_e = (_d = aclRule[ctx.userRole]) !== null && _d !== void 0 ? _d : aclRule.mine) !== null && _e !== void 0 ? _e : aclRule.all)
-                    : aclRule.guest;
+            const aclSelector = (_d = (query["mine|guest"]
+                ? ((_b = (ctx.userRole && ((_a = aclRule[ctx.userRole]) !== null && _a !== void 0 ? _a : aclRule.mine))) !== null && _b !== void 0 ? _b : aclRule.guest)
+                : query.guest
+                    ? aclRule.guest
+                    : ctx.userRole
+                        ? ((_c = aclRule[ctx.userRole]) !== null && _c !== void 0 ? _c : aclRule.mine)
+                        : aclRule.guest)) !== null && _d !== void 0 ? _d : aclRule.all;
             if (!aclSelector) {
-                return (0, router_1.json)({
+                return json({
                     error: "Resource forbidden",
                 }, {
-                    status: router_1.Status._403_Forbidden,
+                    status: Status._403_Forbidden,
                 });
-                // throw new HttpError("Resource forbidden", 403);
             }
             if (query.findFirst != null &&
                 aclEntry.findFirst != null &&
                 query.findFirst !== aclEntry.findFirst) {
-                return (0, router_1.json)({
+                return json({
                     error: query.findFirst
                         ? "find first forbidden by ACL"
                         : "find many forbidden by ACL",
                 }, {
-                    status: router_1.Status._403_Forbidden,
+                    status: Status._403_Forbidden,
                 });
-                // throw new HttpError(
-                //   query.findFirst
-                //     ? "find first forbidden by ACL"
-                //     : "find many forbidden by ACL",
-                //   403,
-                // );
             }
-            ctx.findFirst = (_f = aclEntry.findFirst) !== null && _f !== void 0 ? _f : query.findFirst;
+            ctx.findFirst = (_e = aclEntry.findFirst) !== null && _e !== void 0 ? _e : query.findFirst;
             const tableId = aclEntry.table || resourceId;
             const selector = {};
-            deepCombine(selector, tableId, ctx, aclSelector, select, aclEntry.maxLimit, aclEntry.maxDepth);
-            const formatResult = (_g = aclEntry.formatResult) !== null && _g !== void 0 ? _g : defaultResultFormatter;
+            try {
+                deepCombine(selector, resourceId, tableId, ctx, aclSelector, select, aclEntry, aclEntry.maxDepth != null
+                    ? aclEntry.maxDepth
+                    : aclEntry.maxDepth === null
+                        ? undefined
+                        : defaults === null || defaults === void 0 ? void 0 : defaults.maxDepth);
+            }
+            catch (error) {
+                return json({
+                    error: error.message || "Something went wrong",
+                }, {
+                    status: error.status || Status._400_BadRequest,
+                });
+            }
+            const formatResult = (_g = (_f = aclSelector.formatResult) !== null && _f !== void 0 ? _f : aclEntry.formatResult) !== null && _g !== void 0 ? _g : defaultResultFormatter;
             try {
                 const result = yield database.transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
                     var _a, _b;
@@ -563,14 +805,17 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                     const table = schema[tableId];
                     const columns = selector.columns;
                     const extras = selector.extras;
-                    const selecting = columns === undefined ||
-                        (typeof columns === "object" &&
-                            Object.keys(columns).length > 0) ||
-                        (typeof extras === "object" && Object.keys(extras).length > 0);
+                    if (columns === true) {
+                        selector.columns = undefined;
+                    }
+                    const selecting = columns !== false ||
+                        typeof columns === "object" ||
+                        typeof extras == "object";
                     const result = {
                         rows: null,
                     };
                     if (selecting) {
+                        // selector.columns = undefined;
                         result.rows = ctx.findFirst
                             ? yield tx.query[tableId].findFirst(selector)
                             : yield tx.query[tableId].findMany(selector);
@@ -584,9 +829,8 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                             ? Math.min(limit, count - offset)
                             : count - offset;
                     }
-                    const includeTotal = (_b = query.includeTotal) !== null && _b !== void 0 ? _b : aclEntry.includeTotal;
-                    if (includeTotal) {
-                        const table = schema[tableId];
+                    const countTotal = (_b = query.countTotal) !== null && _b !== void 0 ? _b : aclEntry.countTotal;
+                    if (countTotal) {
                         const total = yield tx.$count(table, aclSelector.where && aclSelector.where(ctx, table, exports.operators));
                         result.total = total;
                     }
@@ -597,7 +841,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                 }));
                 ctx.result = result;
                 const res = formatResult(req, ctx);
-                return res instanceof Response ? res : (0, router_1.status)(router_1.Status._204_NoContent);
+                return res instanceof Response ? res : (0, exports.status)(Status._204_NoContent);
             }
             catch (error) {
                 if (aclSelector.onQueryError) {
@@ -611,10 +855,12 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         }
         catch (error) {
             onError && onError(error);
-            return (0, router_1.json)({
-                error: error.message || "Something went wrong",
+            return json({
+                error: error.cause ||
+                    error.message ||
+                    "Something went wrong",
             }, {
-                status: error.status || router_1.Status._500_InternalServerError,
+                status: error.status || Status._500_InternalServerError,
             });
         }
     });
@@ -630,13 +876,16 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         try {
             const resourceId = req.params[idParam];
             const url = new URL(req.url);
-            const query = TPostQuery(Object.fromEntries(url.searchParams.entries()));
+            const queryParams = {};
+            for (const [k, v] of url.searchParams.entries()) {
+                queryParams[k] = v;
+            }
+            const query = TPostQuery(queryParams);
             if (query instanceof arktype_1.ArkErrors) {
-                // throw new HttpError(query.toString(), Status._400_BadRequest);
-                return (0, router_1.json)({
+                return json({
                     error: query.toString() || "Something went wrong",
                 }, {
-                    status: router_1.Status._400_BadRequest,
+                    status: Status._400_BadRequest,
                 });
             }
             const ctx = {
@@ -645,15 +894,6 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                 body: undefined,
                 resourceId,
             };
-            {
-                const res = (0, router_1.parseBody)({
-                    accept: ["application/json", "application/x-www-form-urlencoded"],
-                    maxSize: 4 * 1024 * 1024,
-                })(req, ctx);
-                if (res instanceof Response) {
-                    return res;
-                }
-            }
             // PARSE SESSION AND AUTHENTICATE
             {
                 const res = yield parseAuth(req, ctx);
@@ -665,45 +905,64 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
             const aclEntry = acl &&
                 acl[resourceId];
             if (aclEntry == null) {
-                return (0, router_1.json)({
+                return json({
                     error: "Resource not found",
                 }, {
-                    status: router_1.Status._404_NotFound,
+                    status: Status._404_NotFound,
                 });
-                // throw new HttpError("Resource not found", Status._404_NotFound);
             }
             const aclRule = aclEntry.control.POST;
             if (aclRule == null) {
-                return (0, router_1.json)({
+                return json({
                     error: "ACL rule not defined for the method",
                 }, {
-                    status: router_1.Status._404_NotFound,
+                    status: Status._404_NotFound,
                 });
-                // throw new HttpError(
-                //   "ACL rule not defined for the method",
-                //   Status._404_NotFound,
-                // );
             }
-            const aclSelector = query["mine|guest"]
-                ? ctx.userRole
-                    ? ((_b = (_a = aclRule[ctx.userRole]) !== null && _a !== void 0 ? _a : aclRule.mine) !== null && _b !== void 0 ? _b : aclRule.all)
-                    : aclRule.guest
-                : !query.guest && ctx.userRole
-                    ? query.mine
-                        ? aclRule.mine
-                        : ((_d = (_c = aclRule[ctx.userRole]) !== null && _c !== void 0 ? _c : aclRule.mine) !== null && _d !== void 0 ? _d : aclRule.all)
-                    : aclRule.guest;
+            const aclSelector = (_d = (query["mine|guest"]
+                ? ((_b = (ctx.userRole && ((_a = aclRule[ctx.userRole]) !== null && _a !== void 0 ? _a : aclRule.mine))) !== null && _b !== void 0 ? _b : aclRule.guest)
+                : query.guest
+                    ? aclRule.guest
+                    : ctx.userRole
+                        ? ((_c = aclRule[ctx.userRole]) !== null && _c !== void 0 ? _c : aclRule.mine)
+                        : aclRule.guest)) !== null && _d !== void 0 ? _d : aclRule.all;
             if (!aclSelector) {
-                return (0, router_1.json)({
+                return json({
                     error: "Resource forbidden",
                 }, {
-                    status: router_1.Status._403_Forbidden,
+                    status: Status._403_Forbidden,
                 });
-                // throw new HttpError("Resource forbidden", 403);
+            }
+            // Parse body
+            {
+                const res = yield (0, exports.parseBody)({
+                    accept: [
+                        "application/json",
+                        "application/x-www-form-urlencoded",
+                        "application/rjson",
+                    ],
+                    maxSize: 4 * 1024 * 1024,
+                })(req, ctx);
+                if (res instanceof Response) {
+                    return res;
+                }
             }
             const tableId = aclEntry.table || resourceId;
             const selector = {};
-            deepCombine(selector, tableId, ctx, aclSelector, select, aclEntry.maxLimit, aclEntry.maxDepth);
+            try {
+                deepCombine(selector, resourceId, tableId, ctx, aclSelector, select, aclEntry, aclEntry.maxDepth != null
+                    ? aclEntry.maxDepth
+                    : aclEntry.maxDepth === null
+                        ? undefined
+                        : defaults === null || defaults === void 0 ? void 0 : defaults.maxDepth);
+            }
+            catch (error) {
+                return json({
+                    error: error.message || "Something went wrong",
+                }, {
+                    status: error.status || Status._400_BadRequest,
+                });
+            }
             const formatResult = (_e = aclEntry.formatResult) !== null && _e !== void 0 ? _e : defaultResultFormatter;
             try {
                 const result = yield database.transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
@@ -717,8 +976,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                             for (let i = 0; i < body.length; i++) {
                                 const vb = yield validateBody(body[i], ctx);
                                 if (vb instanceof arktype_1.ArkErrors) {
-                                    throw new HttpError(vb.toString(), router_1.Status._400_BadRequest);
-                                    // throw vb;
+                                    throw new HttpError(vb.toString(), Status._400_BadRequest);
                                 }
                                 body[i] = vb;
                             }
@@ -726,7 +984,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                         else {
                             const vb = yield validateBody(body, ctx);
                             if (vb instanceof arktype_1.ArkErrors) {
-                                throw new HttpError(vb.toString(), router_1.Status._400_BadRequest);
+                                throw new HttpError(vb.toString(), Status._400_BadRequest);
                                 // throw vb;
                             }
                             body = vb;
@@ -751,21 +1009,41 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                         yield aclSelector.beforeQuery(ctx);
                     }
                     const table = schema[tableId];
-                    let columns;
-                    // get cached columns selector
-                    if (selector.columnsSelector) {
-                        columns = selector.columnsSelector;
-                    }
-                    else if (selector.columns) {
-                        columns = {};
-                        for (const [key, selectColumn] of Object.entries(selector.columns)) {
-                            if (selectColumn)
-                                columns[key] = table[key];
-                        }
-                        selector.columnsSelector = columns;
-                    }
                     const result = { rows: null };
-                    if (columns && Object.keys(columns).length > 0) {
+                    if (selector.columns === undefined) {
+                        selector.columns = true;
+                    }
+                    if (selector.columns) {
+                        const columns = {};
+                        if (selector.columns === true) {
+                            for (const k in table) {
+                                if (k[0] !== "_") {
+                                    columns[k] = table[k];
+                                }
+                            }
+                        }
+                        else {
+                            const columnEntries = Object.entries(selector.columns);
+                            const mode = columnEntries.length > 0 && columnEntries[0][1];
+                            if (mode) {
+                                for (const [k, v] of columnEntries) {
+                                    if (v && k[0] !== "_") {
+                                        if (!Object.prototype.hasOwnProperty.call(table, k)) {
+                                            throw new HttpError(`(${resourceId}) Invalid column '${k}' in select query of table '${tableId}'`, Status._400_BadRequest);
+                                        }
+                                        columns[k] = table[k];
+                                    }
+                                }
+                            }
+                            else {
+                                for (const k in table) {
+                                    if (k[0] !== "_" &&
+                                        selector.columns[k] !== false) {
+                                        columns[k] = table[k];
+                                    }
+                                }
+                            }
+                        }
                         result.rows = yield tx
                             .insert(table)
                             .values(ctx.body)
@@ -776,9 +1054,8 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                         const info = yield tx.insert(table).values(ctx.body);
                         result.rowsAffected = info.rowsAffected;
                     }
-                    const includeTotal = (_a = query.includeTotal) !== null && _a !== void 0 ? _a : aclEntry.includeTotal;
-                    if (includeTotal) {
-                        const table = schema[tableId];
+                    const countTotal = (_a = query.countTotal) !== null && _a !== void 0 ? _a : aclEntry.countTotal;
+                    if (countTotal) {
                         const total = yield tx.$count(table, aclSelector.where && aclSelector.where(ctx, table, exports.operators));
                         result.total = total;
                     }
@@ -789,7 +1066,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                 }));
                 ctx.result = result;
                 const res = formatResult(req, ctx);
-                return res instanceof Response ? res : (0, router_1.status)(router_1.Status._204_NoContent);
+                return res instanceof Response ? res : (0, exports.status)(Status._204_NoContent);
             }
             catch (error) {
                 if (aclSelector.onQueryError) {
@@ -803,10 +1080,12 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         }
         catch (error) {
             onError && onError(error);
-            return (0, router_1.json)({
-                error: error.message || "Something went wrong",
+            return json({
+                error: error.cause ||
+                    error.message ||
+                    "Something went wrong",
             }, {
-                status: error.status || router_1.Status._500_InternalServerError,
+                status: error.status || Status._500_InternalServerError,
             });
         }
     });
@@ -818,13 +1097,16 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         try {
             const resourceId = req.params[idParam];
             const url = new URL(req.url);
-            const query = TPatchQuery(Object.fromEntries(url.searchParams.entries()));
+            const queryParams = {};
+            for (const [k, v] of url.searchParams.entries()) {
+                queryParams[k] = v;
+            }
+            const query = TPatchQuery(queryParams);
             if (query instanceof arktype_1.ArkErrors) {
-                // throw new HttpError(query.toString(), Status._400_BadRequest);
-                return (0, router_1.json)({
+                return json({
                     error: query.toString() || "Something went wrong",
                 }, {
-                    status: router_1.Status._400_BadRequest,
+                    status: Status._400_BadRequest,
                 });
             }
             const ctx = {
@@ -833,15 +1115,6 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                 body: undefined,
                 resourceId,
             };
-            {
-                const res = (0, router_1.parseBody)({
-                    accept: ["application/json", "application/x-www-form-urlencoded"],
-                    maxSize: 4 * 1024 * 1024,
-                })(req, ctx);
-                if (res instanceof Response) {
-                    return res;
-                }
-            }
             // PARSE SESSION AND AUTHENTICATE
             {
                 const res = yield parseAuth(req, ctx);
@@ -853,45 +1126,64 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
             const aclEntry = acl &&
                 acl[resourceId];
             if (aclEntry == null) {
-                return (0, router_1.json)({
+                return json({
                     error: "Resource not found",
                 }, {
-                    status: router_1.Status._404_NotFound,
+                    status: Status._404_NotFound,
                 });
-                // throw new HttpError("Resource not found", Status._404_NotFound);
             }
             const aclRule = aclEntry.control.PATCH;
             if (aclRule == null) {
-                return (0, router_1.json)({
+                return json({
                     error: "ACL rule not defined for the method",
                 }, {
-                    status: router_1.Status._404_NotFound,
+                    status: Status._404_NotFound,
                 });
-                // throw new HttpError(
-                //   "ACL rule not defined for the method",
-                //   Status._404_NotFound,
-                // );
             }
-            const aclSelector = query["mine|guest"]
-                ? ctx.userRole
-                    ? ((_b = (_a = aclRule[ctx.userRole]) !== null && _a !== void 0 ? _a : aclRule.mine) !== null && _b !== void 0 ? _b : aclRule.all)
-                    : aclRule.guest
-                : !query.guest && ctx.userRole
-                    ? query.mine
-                        ? aclRule.mine
-                        : ((_d = (_c = aclRule[ctx.userRole]) !== null && _c !== void 0 ? _c : aclRule.mine) !== null && _d !== void 0 ? _d : aclRule.all)
-                    : aclRule.guest;
+            const aclSelector = (_d = (query["mine|guest"]
+                ? ((_b = (ctx.userRole && ((_a = aclRule[ctx.userRole]) !== null && _a !== void 0 ? _a : aclRule.mine))) !== null && _b !== void 0 ? _b : aclRule.guest)
+                : query.guest
+                    ? aclRule.guest
+                    : ctx.userRole
+                        ? ((_c = aclRule[ctx.userRole]) !== null && _c !== void 0 ? _c : aclRule.mine)
+                        : aclRule.guest)) !== null && _d !== void 0 ? _d : aclRule.all;
             if (!aclSelector) {
-                return (0, router_1.json)({
+                return json({
                     error: "Resource forbidden",
                 }, {
-                    status: router_1.Status._403_Forbidden,
+                    status: Status._403_Forbidden,
                 });
-                // throw new HttpError("Resource forbidden", 403);
+            }
+            // Parse body
+            {
+                const res = yield (0, exports.parseBody)({
+                    accept: [
+                        "application/json",
+                        "application/x-www-form-urlencoded",
+                        "application/rjson",
+                    ],
+                    maxSize: 4 * 1024 * 1024,
+                })(req, ctx);
+                if (res instanceof Response) {
+                    return res;
+                }
             }
             const tableId = aclEntry.table || resourceId;
             const selector = {};
-            deepCombine(selector, tableId, ctx, aclSelector, select, aclEntry.maxLimit, aclEntry.maxDepth);
+            try {
+                deepCombine(selector, resourceId, tableId, ctx, aclSelector, select, aclEntry, aclEntry.maxDepth != null
+                    ? aclEntry.maxDepth
+                    : aclEntry.maxDepth === null
+                        ? undefined
+                        : defaults === null || defaults === void 0 ? void 0 : defaults.maxDepth);
+            }
+            catch (error) {
+                return json({
+                    error: error.message || "Something went wrong",
+                }, {
+                    status: error.status || Status._400_BadRequest,
+                });
+            }
             const formatResult = (_e = aclEntry.formatResult) !== null && _e !== void 0 ? _e : defaultResultFormatter;
             try {
                 const result = yield database.transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
@@ -903,8 +1195,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                     if (validateBody != null) {
                         const vb = yield validateBody(body, ctx);
                         if (vb instanceof arktype_1.ArkErrors) {
-                            throw new HttpError(vb.toString(), router_1.Status._400_BadRequest);
-                            // throw vb;
+                            throw new HttpError(vb.toString(), Status._400_BadRequest);
                         }
                         body = vb;
                     }
@@ -918,21 +1209,41 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                         yield aclSelector.beforeQuery(ctx);
                     }
                     const table = schema[tableId];
-                    let columns;
-                    // get cached columns selector
-                    if (selector.columnsSelector) {
-                        columns = selector.columnsSelector;
-                    }
-                    else if (selector.columns) {
-                        columns = {};
-                        for (const [key, selectColumn] of Object.entries(selector.columns)) {
-                            if (selectColumn)
-                                columns[key] = table[key];
-                        }
-                        selector.columnsSelector = columns;
-                    }
                     const result = { rows: null };
-                    if (columns && Object.keys(columns).length > 0) {
+                    if (selector.columns === undefined) {
+                        selector.columns = true;
+                    }
+                    if (selector.columns) {
+                        const columns = {};
+                        if (selector.columns === true) {
+                            for (const k in table) {
+                                if (k[0] !== "_") {
+                                    columns[k] = table[k];
+                                }
+                            }
+                        }
+                        else {
+                            const columnEntries = Object.entries(selector.columns);
+                            const mode = columnEntries.length > 0 && columnEntries[0][1];
+                            if (mode) {
+                                for (const [k, v] of columnEntries) {
+                                    if (v && k[0] !== "_") {
+                                        if (!Object.prototype.hasOwnProperty.call(table, k)) {
+                                            throw new HttpError(`(${resourceId}) Invalid column '${k}' in select query of table '${tableId}'`, Status._400_BadRequest);
+                                        }
+                                        columns[k] = table[k];
+                                    }
+                                }
+                            }
+                            else {
+                                for (const k in table) {
+                                    if (k[0] !== "_" &&
+                                        selector.columns[k] !== false) {
+                                        columns[k] = table[k];
+                                    }
+                                }
+                            }
+                        }
                         result.rows = yield tx
                             .update(table)
                             .set(ctx.body)
@@ -948,9 +1259,8 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                             selector.where(table, exports.operators));
                         result.rowsAffected = info.rowsAffected;
                     }
-                    const includeTotal = (_a = query.includeTotal) !== null && _a !== void 0 ? _a : aclEntry.includeTotal;
-                    if (includeTotal) {
-                        const table = schema[tableId];
+                    const countTotal = (_a = query.countTotal) !== null && _a !== void 0 ? _a : aclEntry.countTotal;
+                    if (countTotal) {
                         const total = yield tx.$count(table, aclSelector.where && aclSelector.where(ctx, table, exports.operators));
                         result.total = total;
                     }
@@ -961,7 +1271,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                 }));
                 ctx.result = result;
                 const res = formatResult(req, ctx);
-                return res instanceof Response ? res : (0, router_1.status)(router_1.Status._204_NoContent);
+                return res instanceof Response ? res : (0, exports.status)(Status._204_NoContent);
             }
             catch (error) {
                 if (aclSelector.onQueryError) {
@@ -975,10 +1285,12 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         }
         catch (error) {
             onError && onError(error);
-            return (0, router_1.json)({
-                error: error.message || "Something went wrong",
+            return json({
+                error: error.cause ||
+                    error.message ||
+                    "Something went wrong",
             }, {
-                status: error.status || router_1.Status._500_InternalServerError,
+                status: error.status || Status._500_InternalServerError,
             });
         }
     });
@@ -990,13 +1302,16 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         try {
             const resourceId = req.params[idParam];
             const url = new URL(req.url);
-            const query = TDeleteQuery(Object.fromEntries(url.searchParams.entries()));
+            const queryParams = {};
+            for (const [k, v] of url.searchParams.entries()) {
+                queryParams[k] = v;
+            }
+            const query = TDeleteQuery(queryParams);
             if (query instanceof arktype_1.ArkErrors) {
-                // throw new HttpError(query.toString(), Status._400_BadRequest);
-                return (0, router_1.json)({
+                return json({
                     error: query.toString() || "Something went wrong",
                 }, {
-                    status: router_1.Status._400_BadRequest,
+                    status: Status._400_BadRequest,
                 });
             }
             const ctx = {
@@ -1015,45 +1330,50 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
             const aclEntry = acl &&
                 acl[resourceId];
             if (aclEntry == null) {
-                return (0, router_1.json)({
+                return json({
                     error: "Resource not found",
                 }, {
-                    status: router_1.Status._404_NotFound,
+                    status: Status._404_NotFound,
                 });
-                // throw new HttpError("Resource not found", Status._404_NotFound);
             }
             const aclRule = aclEntry.control.DELETE;
             if (aclRule == null) {
-                return (0, router_1.json)({
+                return json({
                     error: "ACL rule not defined for the method",
                 }, {
-                    status: router_1.Status._404_NotFound,
+                    status: Status._404_NotFound,
                 });
-                // throw new HttpError(
-                //   "ACL rule not defined for the method",
-                //   Status._404_NotFound,
-                // );
             }
-            const aclSelector = query["mine|guest"]
-                ? ctx.userRole
-                    ? ((_b = (_a = aclRule[ctx.userRole]) !== null && _a !== void 0 ? _a : aclRule.mine) !== null && _b !== void 0 ? _b : aclRule.all)
-                    : aclRule.guest
-                : !query.guest && ctx.userRole
-                    ? query.mine
-                        ? aclRule.mine
-                        : ((_d = (_c = aclRule[ctx.userRole]) !== null && _c !== void 0 ? _c : aclRule.mine) !== null && _d !== void 0 ? _d : aclRule.all)
-                    : aclRule.guest;
+            const aclSelector = (_d = (query["mine|guest"]
+                ? ((_b = (ctx.userRole && ((_a = aclRule[ctx.userRole]) !== null && _a !== void 0 ? _a : aclRule.mine))) !== null && _b !== void 0 ? _b : aclRule.guest)
+                : query.guest
+                    ? aclRule.guest
+                    : ctx.userRole
+                        ? ((_c = aclRule[ctx.userRole]) !== null && _c !== void 0 ? _c : aclRule.mine)
+                        : aclRule.guest)) !== null && _d !== void 0 ? _d : aclRule.all;
             if (!aclSelector) {
-                return (0, router_1.json)({
+                return json({
                     error: "Resource forbidden",
                 }, {
-                    status: router_1.Status._403_Forbidden,
+                    status: Status._403_Forbidden,
                 });
-                // throw new HttpError("Resource forbidden", 403);
             }
             const tableId = aclEntry.table || resourceId;
             const selector = {};
-            deepCombine(selector, tableId, ctx, aclSelector, select, aclEntry.maxLimit, aclEntry.maxDepth);
+            try {
+                deepCombine(selector, resourceId, tableId, ctx, aclSelector, select, aclEntry, aclEntry.maxDepth != null
+                    ? aclEntry.maxDepth
+                    : aclEntry.maxDepth === null
+                        ? undefined
+                        : defaults === null || defaults === void 0 ? void 0 : defaults.maxDepth);
+            }
+            catch (error) {
+                return json({
+                    error: error.message || "Something went wrong",
+                }, {
+                    status: error.status || Status._400_BadRequest,
+                });
+            }
             const formatResult = (_e = aclEntry.formatResult) !== null && _e !== void 0 ? _e : defaultResultFormatter;
             try {
                 const result = yield database.transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
@@ -1063,22 +1383,41 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                         yield aclSelector.beforeQuery(ctx);
                     }
                     const table = schema[tableId];
-                    let columns;
-                    // get cached columns selector
-                    if (selector.columnsSelector) {
-                        columns = selector.columnsSelector;
-                    }
-                    else if (selector.columns) {
-                        columns = {};
-                        for (const [key, selectColumn] of Object.entries(selector.columns)) {
-                            if (selectColumn)
-                                columns[key] = table[key];
-                        }
-                        selector.columnsSelector = columns;
-                    }
                     const result = { rows: null };
-                    if (columns == null ||
-                        (typeof columns == "object" && Object.keys(columns).length > 0)) {
+                    if (selector.columns === undefined) {
+                        selector.columns = true;
+                    }
+                    if (selector.columns) {
+                        const columns = {};
+                        if (selector.columns === true) {
+                            for (const k in table) {
+                                if (k[0] !== "_") {
+                                    columns[k] = table[k];
+                                }
+                            }
+                        }
+                        else {
+                            const columnEntries = Object.entries(selector.columns);
+                            const mode = columnEntries.length > 0 && columnEntries[0][1];
+                            if (mode) {
+                                for (const [k, v] of columnEntries) {
+                                    if (v && k[0] !== "_") {
+                                        if (!Object.prototype.hasOwnProperty.call(table, k)) {
+                                            throw new HttpError(`(${resourceId}) Invalid column '${k}' in select query of table '${tableId}'`, Status._400_BadRequest);
+                                        }
+                                        columns[k] = table[k];
+                                    }
+                                }
+                            }
+                            else {
+                                for (const k in table) {
+                                    if (k[0] !== "_" &&
+                                        selector.columns[k] !== false) {
+                                        columns[k] = table[k];
+                                    }
+                                }
+                            }
+                        }
                         result.rows = yield tx
                             .delete(table)
                             .where(selector.where &&
@@ -1092,9 +1431,8 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                             selector.where(table, exports.operators));
                         result.rowsAffected = info.rowsAffected;
                     }
-                    const includeTotal = (_a = query.includeTotal) !== null && _a !== void 0 ? _a : aclEntry.includeTotal;
-                    if (includeTotal) {
-                        const table = schema[tableId];
+                    const countTotal = (_a = query.countTotal) !== null && _a !== void 0 ? _a : aclEntry.countTotal;
+                    if (countTotal) {
                         const total = yield tx.$count(table, aclSelector.where && aclSelector.where(ctx, table, exports.operators));
                         result.total = total;
                     }
@@ -1105,7 +1443,7 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
                 }));
                 ctx.result = result;
                 const res = formatResult(req, ctx);
-                return res instanceof Response ? res : (0, router_1.status)(router_1.Status._204_NoContent);
+                return res instanceof Response ? res : (0, exports.status)(Status._204_NoContent);
             }
             catch (error) {
                 if (aclSelector.onQueryError) {
@@ -1119,10 +1457,12 @@ const createQueryRoute = ({ acl, schema, database, idParam, onSurpassMaxLimit = 
         }
         catch (error) {
             onError && onError(error);
-            return (0, router_1.json)({
-                error: error.message || "Something went wrong",
+            return json({
+                error: error.cause ||
+                    error.message ||
+                    "Something went wrong",
             }, {
-                status: error.status || router_1.Status._500_InternalServerError,
+                status: error.status || Status._500_InternalServerError,
             });
         }
     });

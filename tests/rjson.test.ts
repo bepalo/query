@@ -32,7 +32,7 @@ describe("RJSON - Serialization", () => {
     });
 
     it("should stringify null", () => {
-      expect(RJSON.stringify(null)).toBe("");
+      expect(RJSON.stringify(null)).toBe("N");
     });
 
     it("should stringify undefined", () => {
@@ -180,7 +180,9 @@ describe("RJSON - Parsing", () => {
     });
 
     it("should parse deeply nested structures", () => {
-      const result = RJSON.parse("(level1:(level2:(level3:(value:'deep'))))");
+      const result: any = RJSON.parse(
+        "(level1:(level2:(level3:(value:'deep'))))",
+      );
       expect(result.level1.level2.level3.value).toBe("deep");
     });
   });
@@ -228,7 +230,7 @@ describe("RJSON - Parsing", () => {
     it("should parse database query selectors", () => {
       const selector =
         "(limit:10,offset:20,columns:(id:T,title:T),where:(published:T))";
-      const result = RJSON.parse(selector);
+      const result: any = RJSON.parse(selector);
       expect(result.limit).toBe(10);
       expect(result.offset).toBe(20);
       expect(result.columns.id).toBe(true);
@@ -237,7 +239,7 @@ describe("RJSON - Parsing", () => {
 
     it("should parse permission objects", () => {
       const permissions = "(read:T,write:T,delete:F)";
-      const result = RJSON.parse(permissions);
+      const result: any = RJSON.parse(permissions);
       expect(result.read).toBe(true);
       expect(result.write).toBe(true);
       expect(result.delete).toBe(false);
@@ -246,7 +248,7 @@ describe("RJSON - Parsing", () => {
     it("should parse complex query with relations", () => {
       const query =
         "(limit:10,columns:(id:T,title:T),with:(user:(columns:(id:T,name:T))))";
-      const result = RJSON.parse(query);
+      const result: any = RJSON.parse(query);
       expect(result.limit).toBe(10);
       expect(result.with.user.columns.name).toBe(true);
     });

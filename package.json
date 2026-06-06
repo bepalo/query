@@ -1,6 +1,6 @@
 {
   "name": "@bepalo/query",
-  "version": "1.1.6",
+  "version": "2.3.8",
   "description": "A type-safe access-control-driven unified RESTful database query engine for backend using Drizzle ORM.",
   "author": "Natnael Eshetu",
   "license": "MIT",
@@ -45,10 +45,10 @@
     "test": "vitest --reporter=dot",
     "test:ci": "vitest run --reporter=vitest-markdown-reporter --outputFile=test-result.md"
   },
-  "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485",
+  "packageManager": "pnpm@11.5.2+sha512.71c631e382066efc25625d5cf029075de07b61b37f6e27350fbd84b1bda5864c8c1967adc280776b45c30a715c0359a3be08fef42d5bb09e2b99029979692916",
   "devDependencies": {
     "@types/bun": "^1.3.14",
-    "@types/node": "^24.12.4",
+    "@types/node": "^24.13.0",
     "concurrently": "^9.2.1",
     "typescript": "^5.9.3",
     "vitest": "^3.2.6",
@@ -65,8 +65,7 @@
     "server"
   ],
   "dependencies": {
-    "@bepalo/rjson": "^1.0.6",
-    "@bepalo/router": "^2.14.38",
+    "@bepalo/rjson": "^2.1.11",
     "arktype": "^2.2.0",
     "drizzle-orm": "^0.45.2"
   }

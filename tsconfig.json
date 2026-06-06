@@ -5,6 +5,7 @@
     "moduleResolution": "NodeNext",
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
+    "rootDir": ".",
     "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,

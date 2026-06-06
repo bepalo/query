@@ -2,56 +2,16 @@
 
 | 🕙 Start time | ⌛ Duration |
 | --- | ---: |
-| 6/4/2026, 3:24:42 PM | 1.882 s |
+| 6/6/2026, 6:30:31 AM | 1.608 s |
 
 | | ✅ Passed | ❌ Failed | ⏩ Skipped | 🚧 Todo | ⚪ Total |
 | --- | ---: | ---: | ---: | ---: | ---: |
-|Test Suites|36|0|0|0|36|
-|Tests|116|0|0|0|116|
+|Test Suites|24|0|0|0|24|
+|Tests|86|0|0|0|86|
 
-## ✅ <a id="file0" href="#file0">tests/client.test.ts</a>
+## ✅ <a id="file0" href="#file0">tests/create-query-route.test.ts</a>
 
-24 passed, 0 failed, 0 skipped, 0 todo, done in 16.326407000000017 s
-
-```
-✅ Client Query Builder › GET Queries
-   ✅ should build basic GET query
-   ✅ should build GET query with columns
-   ✅ should build GET query with limit and offset
-   ✅ should build GET query with where clause
-   ✅ should build GET query with orderBy
-   ✅ should build GET query with all options
-   ✅ should return URLSearchParams
-✅ Client Query Builder › POST Queries
-   ✅ should build basic POST query
-   ✅ should build POST query with columns
-✅ Client Query Builder › PATCH Queries
-   ✅ should build basic PATCH query
-   ✅ should build PATCH query with where clause
-✅ Client Query Builder › DELETE Queries
-   ✅ should build basic DELETE query
-   ✅ should build DELETE query with where clause
-✅ Client Query Builder › Query Parameters
-   ✅ should generate valid URL search params
-   ✅ should handle empty selections
-   ✅ should properly encode special characters
-✅ Client Query Builder › Multiple Queries
-   ✅ should build different query types independently
-   ✅ should allow chaining different queries
-✅ Client Query Builder › Real World Scenarios
-   ✅ should build pagination query
-   ✅ should build filtered and sorted query
-   ✅ should build query with multiple column selections
-   ✅ should be usable in fetch
-✅ Client Query Builder › Type Safety
-   ✅ should create query builder without errors
-   ✅ should handle different resource types
-✅ Client Query Builder
-```
-
-## ✅ <a id="file1" href="#file1">tests/create-query-route.test.ts</a>
-
-3 passed, 0 failed, 0 skipped, 0 todo, done in 6.253281999999672 s
+3 passed, 0 failed, 0 skipped, 0 todo, done in 5.782183000000259 s
 
 ```
 ✅ createQueryRoute
@@ -60,9 +20,9 @@
    ✅ should integrate with custom error handlers
 ```
 
-## ✅ <a id="file2" href="#file2">tests/http-error.test.ts</a>
+## ✅ <a id="file1" href="#file1">tests/http-error.test.ts</a>
 
-6 passed, 0 failed, 0 skipped, 0 todo, done in 9.965693999999985 s
+6 passed, 0 failed, 0 skipped, 0 todo, done in 8.284133999999995 s
 
 ```
 ✅ HttpError
@@ -74,23 +34,9 @@
    ✅ should preserve status for common HTTP codes
 ```
 
-## ✅ <a id="file3" href="#file3">tests/integration.test.ts</a>
+## ✅ <a id="file2" href="#file2">tests/query-validation.test.ts</a>
 
-6 passed, 0 failed, 0 skipped, 0 todo, done in 25.94682499999999 s
-
-```
-✅ Integration — createQueryRoute full lifecycle
-   ✅ should process a GET request and return JSON
-   ✅ should enforce ACL block on GET
-   ✅ should process a POST request and create a resource
-   ✅ should process a PATCH request and update a resource
-   ✅ should process a DELETE request
-   ✅ should respect maxLimit configuration
-```
-
-## ✅ <a id="file4" href="#file4">tests/query-validation.test.ts</a>
-
-41 passed, 0 failed, 0 skipped, 0 todo, done in 22.388962999999876 s
+41 passed, 0 failed, 0 skipped, 0 todo, done in 23.343184000000292 s
 
 ```
 ✅ TSelectorGet — GET query selector validation
@@ -143,9 +89,9 @@
    ✅ should validate array operations like _()_
 ```
 
-## ✅ <a id="file5" href="#file5">tests/rjson.test.ts</a>
+## ✅ <a id="file3" href="#file3">tests/rjson.test.ts</a>
 
-36 passed, 0 failed, 0 skipped, 0 todo, done in 21.05959699999994 s
+36 passed, 0 failed, 0 skipped, 0 todo, done in 18.09929000000011 s
 
 ```
 ✅ RJSON - Serialization › Basic Types
