@@ -260,7 +260,7 @@ export const basket = sqliteTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     name: text("name", { length: 30 }).notNull(),
-    capacity: integer("address", { mode: "number" }).notNull().default(20),
+    capacity: integer("capacity", { mode: "number" }).notNull().default(20),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .notNull(),

@@ -45,10 +45,16 @@ export type InferResponseType<
   rowsAffected?: number;
 } & (
   | ({ count: number } & {
-      [R in resourceId]: Schema[tableId][] | null;
+      [R in resourceId]:
+        | InferSelectModel<
+            Schema[tableId] extends Table ? Schema[tableId] : never
+          >[]
+        | null;
     })
   | {
-      [R in resourceId]: Schema[tableId] | null;
+      [R in resourceId]: InferSelectModel<
+        Schema[tableId] extends Table ? Schema[tableId] : never
+      > | null;
     }
 );
 
@@ -60,7 +66,9 @@ export type InferResponseTypeFirst<
   total?: number;
   rowsAffected?: number;
 } & {
-  [R in resourceId]: Schema[tableId] | null;
+  [R in resourceId]: InferSelectModel<
+    Schema[tableId] extends Table ? Schema[tableId] : never
+  > | null;
 };
 
 export type InferResponseTypeMany<
@@ -71,7 +79,11 @@ export type InferResponseTypeMany<
   total?: number;
   rowsAffected?: number;
 } & ({ count: number } & {
-  [R in resourceId]: Schema[tableId][] | null;
+  [R in resourceId]:
+    | InferSelectModel<
+        Schema[tableId] extends Table ? Schema[tableId] : never
+      >[]
+    | null;
 });
 
 type BepaloQueryWith<

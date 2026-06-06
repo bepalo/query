@@ -14,15 +14,15 @@ export type InferResponseType<resourceId extends string, Schema extends Record<s
 } & (({
     count: number;
 } & {
-    [R in resourceId]: Schema[tableId][] | null;
+    [R in resourceId]: InferSelectModel<Schema[tableId] extends Table ? Schema[tableId] : never>[] | null;
 }) | {
-    [R in resourceId]: Schema[tableId] | null;
+    [R in resourceId]: InferSelectModel<Schema[tableId] extends Table ? Schema[tableId] : never> | null;
 });
 export type InferResponseTypeFirst<resourceId extends string, Schema extends Record<string, Table | unknown>, tableId extends keyof Schema> = {
     total?: number;
     rowsAffected?: number;
 } & {
-    [R in resourceId]: Schema[tableId] | null;
+    [R in resourceId]: InferSelectModel<Schema[tableId] extends Table ? Schema[tableId] : never> | null;
 };
 export type InferResponseTypeMany<resourceId extends string, Schema extends Record<string, Table | unknown>, tableId extends keyof Schema> = {
     total?: number;
@@ -30,7 +30,7 @@ export type InferResponseTypeMany<resourceId extends string, Schema extends Reco
 } & ({
     count: number;
 } & {
-    [R in resourceId]: Schema[tableId][] | null;
+    [R in resourceId]: InferSelectModel<Schema[tableId] extends Table ? Schema[tableId] : never>[] | null;
 });
 type BepaloQueryWith<T extends Record<string, unknown>, Database extends {
     query: any;
